@@ -180,7 +180,7 @@ void Game::Initialise()
 	 p2 = glm::vec3(0, 10, 200);
 	 p3 = glm::vec3(-500, 10, 200);
 
-	 m_pPath->CreatePath(p0, p1, p2, p3);
+	 m_pPath->CreateCentreline();
 
 }
 
@@ -294,7 +294,7 @@ void Game::Render()
 	pMainProgram->SetUniform("matrices.normalMatrix",
 		m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 	// Render your object here
-	m_pPath->RenderPath();
+	m_pPath->RenderCentreline();
 	modelViewMatrixStack.Pop();
 
 	// Draw the 2D graphics after the 3D graphics
@@ -313,8 +313,11 @@ void Game::Update()
 	static float t = 0.0f;
 	t += 0.0005f * (float)m_dt;
 	if (t > 1.0f) t = 0.0f;
-	m_pCamera->Set( m_pCamera->GetPosition(), m_pCamera->GetView(), m_pCamera->GetUpVector());
-	m_pPath->RenderPath();
+	m_pCamera->Update(m_dt);
+	//m_pCamera->Set( m_pCamera->GetPosition(), m_pCamera->GetView(), m_pCamera->GetUpVector());
+	//m_pPath->RenderPath();
+	m_pPath->RenderCentreline();
+
 	m_pAudio->Update();
 }
 
