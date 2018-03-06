@@ -1,4 +1,4 @@
-﻿  CatmullRom.cpp
-CatmullRom.cpp(176): warning C4018: '<': signed/unsigned mismatch
-  OpenGLTemplate.vcxproj -> D:\desk2\City University\Graphics\Labs\Lab3\OpenGLTemplate2017a\Template\Debug\OpenGLTemplate.exe
-  OpenGLTemplate.vcxproj -> D:\desk2\City University\Graphics\Labs\Lab3\OpenGLTemplate2017a\Template\Debug\OpenGLTemplate.pdb (Full PDB)
+﻿  Game.cpp
+Game.cpp(330): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+  OpenGLTemplate.vcxproj -> D:\All other git repos\Lab CG\Lab3-Graphics\Template\Debug\OpenGLTemplate.exe
+  OpenGLTemplate.vcxproj -> D:\All other git repos\Lab CG\Lab3-Graphics\Template\Debug\OpenGLTemplate.pdb (Full PDB)

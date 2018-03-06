@@ -55,6 +55,9 @@ Game::Game()
 	m_framesPerSecond = 0;
 	m_frameCount = 0;
 	m_elapsedTime = 0.0f;
+	m_currentDistance = 0.0f;
+	m_cameraSpeed = 0.1f;
+
 }
 
 // Destructor
@@ -175,12 +178,14 @@ void Game::Initialise()
 	m_pAudio->PlayMusicStream();
 
 	//m_pCamera->Set(glm::vec3(0,300,0), glm::vec3(0,0,0), glm::vec3(1,0,0));
-	 p0 = glm::vec3(-500, 10, -200);
+	/* p0 = glm::vec3(-500, 10, -200);
 	 p1 = glm::vec3(0, 10, -200);
 	 p2 = glm::vec3(0, 10, 200);
-	 p3 = glm::vec3(-500, 10, 200);
+	 p3 = glm::vec3(-500, 10, 200);*/
 
 	 m_pPath->CreateCentreline();
+	 m_pPath->CreateOffsetCurves();
+	 m_pPath->CreateTrack();
 
 }
 
@@ -295,8 +300,18 @@ void Game::Render()
 		m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 	// Render your object here
 	m_pPath->RenderCentreline();
+	m_pPath->RenderOffsetCurves();
+	m_pPath->RenderTrack();
 	modelViewMatrixStack.Pop();
 
+	//modelViewMatrixStack.Push();
+	//pMainProgram->SetUniform("bUseTexture", false); // turn off texturing
+	//pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	//pMainProgram->SetUniform("matrices.normalMatrix",
+	//	m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	//// Render your object here
+	//m_pPath->RenderTrack();
+	//modelViewMatrixStack.Pop();
 	// Draw the 2D graphics after the 3D graphics
 	DisplayFrameRate();
 
@@ -308,17 +323,32 @@ void Game::Render()
 // Update method runs repeatedly with the Render method
 void Game::Update() 
 {
-	static CCatmullRom *path;
-		
-	static float t = 0.0f;
-	t += 0.0005f * (float)m_dt;
-	if (t > 1.0f) t = 0.0f;
-	m_pCamera->Update(m_dt);
-	//m_pCamera->Set( m_pCamera->GetPosition(), m_pCamera->GetView(), m_pCamera->GetUpVector());
-	//m_pPath->RenderPath();
-	m_pPath->RenderCentreline();
+	
+	
+	glm::vec3 p,pNext,T,B,N,dist;
 
-	m_pAudio->Update();
+	m_currentDistance += m_dt*m_cameraSpeed;
+	m_pPath->Sample(m_currentDistance, p);
+	m_pPath->Sample(m_currentDistance+0.1f, pNext);
+	p.y += 1.0f; pNext.y += 1.0f;
+	T = glm::normalize(pNext - p);
+	m_pCamera->Set(p, p + 10.0f*T, m_pCamera->GetUpVector());
+
+	//N = glm::normalize(glm::cross(T, glm::vec3(0, 1, 0)));
+	//B = glm::normalize(glm::cross(N, T));
+
+	//static CCatmullRom *path;
+		
+	/*static float t = 0.0f;
+	t += 0.0005f * (float)m_dt;
+	if (t > 1.0f) t = 0.0f;*/
+	//m_pCamera->Update(m_dt);
+	//m_pCamera->Set( p, m_pCamera->GetView(), m_pCamera->GetUpVector());
+	//m_pCamera->Set(p,p + 10.0f*T, m_pCamera->GetUpVector());
+	//m_pPath->RenderPath();
+	
+	//m_pPath->RenderCentreline();
+	//m_pAudio->Update();
 }
 
 
