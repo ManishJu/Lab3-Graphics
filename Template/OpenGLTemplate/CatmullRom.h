@@ -48,7 +48,7 @@ private:
 
 	vector<glm::vec3> m_leftOffsetPoints;	// Left offset curve points
 	vector<glm::vec3> m_rightOffsetPoints;	// Right offset curve points
-
+	CTexture m_pTex1;
 
 	unsigned int m_vertexCount;				// Number of vertices in the track VBO
 };

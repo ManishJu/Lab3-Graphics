@@ -31,16 +31,33 @@ glm::vec3 CCatmullRom::Interpolate(glm::vec3 &p0, glm::vec3 &p1, glm::vec3 &p2, 
 void CCatmullRom::SetControlPoints()
 {
     // Set control points (m_controlPoints) here, or load from disk
-
+	int y = 1;
     // Optionally, set upvectors (m_controlUpVectors, one for each control point as well)
-    m_controlPoints.push_back(glm::vec3(100, 5, 0));
-    m_controlPoints.push_back(glm::vec3(71, 5, 71));
-    m_controlPoints.push_back(glm::vec3(0, 5, 100));
-    m_controlPoints.push_back(glm::vec3(-71, 5, 71));
-    m_controlPoints.push_back(glm::vec3(-100, 5, 0));
+    m_controlPoints.push_back(glm::vec3(100, y, 0));
+    m_controlPoints.push_back(glm::vec3(71, y, 71));
+    m_controlPoints.push_back(glm::vec3(0, y, 100));
+    m_controlPoints.push_back(glm::vec3(-71, y, 71));
+    m_controlPoints.push_back(glm::vec3(-100, y, 0));
+
+
+	m_controlPoints.push_back(glm::vec3(-100, y, -50));
+	m_controlPoints.push_back(glm::vec3(-100, y, -100));
+	m_controlPoints.push_back(glm::vec3(-71, y, -129));
+	/*m_controlPoints.push_back(glm::vec3(-30, y, -160));
+	m_controlPoints.push_back(glm::vec3(70, y, -180));
+	m_controlPoints.push_back(glm::vec3(120, y, -231));
+	m_controlPoints.push_back(glm::vec3(90, y, -140));*/
+	m_controlPoints.push_back(glm::vec3(-100, y, -321));
+	m_controlPoints.push_back(glm::vec3(-71, y, -452));
+	m_controlPoints.push_back(glm::vec3(0, y, -530));
+	m_controlPoints.push_back(glm::vec3(200, y, -470));
+	m_controlPoints.push_back(glm::vec3(300, y, -300));
+	m_controlPoints.push_back(glm::vec3(100, y, 0));
+	
+/*
     m_controlPoints.push_back(glm::vec3(-71, 5, -71));
     m_controlPoints.push_back(glm::vec3(0, 5, -100));
-    m_controlPoints.push_back(glm::vec3(71, 5, -71));
+    m_controlPoints.push_back(glm::vec3(71, 5, -71));*/
 }
 
 
@@ -268,6 +285,15 @@ void CCatmullRom::CreateOffsetCurves()
 
 void CCatmullRom::CreateTrack()
 {
+
+	//texture mapping;
+	m_pTex1.Load("dirtpile01.jpg");
+	m_pTex1.SetSamplerObjectParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	m_pTex1.SetSamplerObjectParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	m_pTex1.SetSamplerObjectParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+	m_pTex1.SetSamplerObjectParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
    
     // Compute the offset curves, one left, and one right.  Store the points in m_leftOffsetPoints and m_rightOffsetPoints respectively
     // Generate two VAOs called m_vaoLeftOffsetCurve and m_vaoRightOffsetCurve, each with a VBO, and get the offset curve points on the graphics card
@@ -314,7 +340,7 @@ void CCatmullRom::RenderCentreline()
     glDrawArrays(GL_POINTS, 0, num_samples_curve);
     glPointSize(3.0f);
     glDrawArrays(GL_LINE_LOOP, 0, num_samples_curve);
-    glLineWidth(1.0f);
+    glLineWidth(10.0f);
 }
 
 void CCatmullRom::RenderOffsetCurves()
@@ -336,6 +362,8 @@ void CCatmullRom::RenderTrack()
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     // Bind the VAO m_vaoTrack and render it
     glBindVertexArray(m_vaoTrack);
+	m_pTex1.Bind();
+	//glBindTexture(GL_TEXTURE_2D,m_vaoTrack);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 2*num_samples_curve);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }

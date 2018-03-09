@@ -56,7 +56,7 @@ Game::Game()
 	m_frameCount = 0;
 	m_elapsedTime = 0.0f;
 	m_currentDistance = 0.0f;
-	m_cameraSpeed = 0.1f;
+	m_cameraSpeed = 0.05f;
 
 }
 
@@ -332,7 +332,7 @@ void Game::Update()
 	m_pPath->Sample(m_currentDistance+0.1f, pNext);
 	p.y += 1.0f; pNext.y += 1.0f;
 	T = glm::normalize(pNext - p);
-	m_pCamera->Set(p, p + 10.0f*T, m_pCamera->GetUpVector());
+	//m_pCamera->Set(p, p + 10.0f*T, m_pCamera->GetUpVector());
 
 	//N = glm::normalize(glm::cross(T, glm::vec3(0, 1, 0)));
 	//B = glm::normalize(glm::cross(N, T));
@@ -342,7 +342,7 @@ void Game::Update()
 	/*static float t = 0.0f;
 	t += 0.0005f * (float)m_dt;
 	if (t > 1.0f) t = 0.0f;*/
-	//m_pCamera->Update(m_dt);
+	m_pCamera->Update(m_dt);
 	//m_pCamera->Set( p, m_pCamera->GetView(), m_pCamera->GetUpVector());
 	//m_pCamera->Set(p,p + 10.0f*T, m_pCamera->GetUpVector());
 	//m_pPath->RenderPath();
