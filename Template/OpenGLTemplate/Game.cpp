@@ -57,6 +57,7 @@ Game::Game()
 	m_elapsedTime = 0.0f;
 	m_currentDistance = 0.0f;
 	m_cameraSpeed = 0.05f;
+	m_pPlayerPos = 0.0f;
 
 }
 
@@ -91,6 +92,8 @@ void Game::Initialise()
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClearDepth(1.0f);
 
+	m_pPlayerPos = 0.0f;
+	m_pCameraUpVector = &B;
 	/// Create objects
 	m_pCamera = new CCamera;
 	m_pSkybox = new CSkybox;
@@ -325,24 +328,49 @@ void Game::Update()
 {
 	
 	
-	glm::vec3 p,pNext,T,B,N,dist;
+	static glm::vec3 p,pNext,dist,pos,thirdPView,bThirdView,x;
 
-	m_currentDistance += m_dt*m_cameraSpeed;
+
+	m_currentDistance += m_dt*m_cameraSpeed*0.5f;
 	m_pPath->Sample(m_currentDistance, p);
 	m_pPath->Sample(m_currentDistance+0.1f, pNext);
-	p.y += 1.0f; pNext.y += 1.0f;
+	p.y += 1; pNext.y += 1;
 	T = glm::normalize(pNext - p);
-	//m_pCamera->Set(p, p + 10.0f*T, m_pCamera->GetUpVector());
+	N = glm::normalize(glm::cross(T, glm::vec3(0, 1, 0)));
+	B = glm::normalize(glm::cross(N, T));
 
-	//N = glm::normalize(glm::cross(T, glm::vec3(0, 1, 0)));
-	//B = glm::normalize(glm::cross(N, T));
+	// position change on track (left right or center)
+	if (m_pPlayerPos == 0) pos = glm::vec3(0.0f, 0.0f, 0.0f);
+	else if (m_pPlayerPos == 1) pos = N;
+	else pos = -N;
+
+	//
+	if (turnOnThirdPersonMode) {
+		p -= 5.0f*T;
+		p.y += 4.0f;
+		//*m_pCameraUpVector = glm::rotate(glm::vec3(0, 1, 0), m_cameraRotation, B);
+		//glm::rotate(glm::vec3(0, 1, 0), 0.5f, B);
+
+		*m_pCameraUpVector = glm::rotate(*m_pCameraUpVector, m_cameraRotation, N);
+
+	}
+	//m_pCameraUpVector = &bThirdView;
+
+	//case 1
+	//m_pCamera->Set(p, p + 10.0f*T, m_pCamera->GetUpVector());
+	//case 2
+	//p += 1.0f*T; //moving forward
+	p += 2.0f*pos; //position change on the left side of track
+	m_pCamera->Set(p, p + 1.0f*(*m_pCameraViewDir), *m_pCameraUpVector);
+
+	
 
 	//static CCatmullRom *path;
 		
 	/*static float t = 0.0f;
 	t += 0.0005f * (float)m_dt;
 	if (t > 1.0f) t = 0.0f;*/
-	m_pCamera->Update(m_dt);
+	//m_pCamera->Update(m_dt);
 	//m_pCamera->Set( p, m_pCamera->GetView(), m_pCamera->GetUpVector());
 	//m_pCamera->Set(p,p + 10.0f*T, m_pCamera->GetUpVector());
 	//m_pPath->RenderPath();
@@ -384,6 +412,11 @@ void Game::DisplayFrameRate()
 		fontProgram->SetUniform("matrices.projMatrix", m_pCamera->GetOrthographicProjectionMatrix());
 		fontProgram->SetUniform("vColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		m_pFtFont->Render(20, height - 20, 20, "FPS: %d", m_framesPerSecond);
+		m_pFtFont->Render(20, height - 40, 20, "Player Position %f", m_pPlayerPos);
+
+		m_pFtFont->Render(20, height - 60, 20, "View direction %f ,%f, %f", (*m_pCameraViewDir).x, (*m_pCameraViewDir).y, (*m_pCameraViewDir).z);
+		m_pFtFont->Render(20, height - 80, 20, "View direction %f ,%f, %f", m_pCamera->GetView().x, m_pCamera->GetView().y, m_pCamera->GetView().z);
+
 	}
 }
 
@@ -492,6 +525,40 @@ LRESULT Game::ProcessEvents(HWND window,UINT message, WPARAM w_param, LPARAM l_p
 		case VK_F1:
 			m_pAudio->PlayEventSound();
 			break;
+		case 'A':
+			m_pPlayerPos = std::min(1.0f, std::max(m_pPlayerPos - 1.0f, -1.0f));
+			break;
+		case 'D':
+			m_pPlayerPos = std::min(1.0f, std::max(m_pPlayerPos + 1.0f, -1.0f));
+			break;
+		case 'L':
+			m_pCameraViewDir = &N;
+			m_pCameraUpVector = &B;
+			turnOnThirdPersonMode = false;
+			break;
+		case 'F':
+			m_pCameraViewDir = &T;
+			m_pCameraUpVector = &B;
+			turnOnThirdPersonMode = false;
+
+			break;
+		case 'U':
+			m_pCameraViewDir = &B;
+			m_pCameraUpVector = &T;
+			*m_pCameraUpVector = -*m_pCameraUpVector;
+			turnOnThirdPersonMode = false;
+			break;
+		case 'T':
+			m_pCameraViewDir = &T;
+			m_pCameraUpVector = &B;
+			turnOnThirdPersonMode = true;
+			break;
+
+		case 'W':
+			m_cameraRotation += m_dt*0.1f;
+			break;
+
+
 		}
 		break;
 

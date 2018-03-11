@@ -41,11 +41,17 @@ private:
 
 
 	// Some other member variables
+	bool turnOnThirdPersonMode = false;
 	double m_dt;
 	int m_framesPerSecond;
 	bool m_appActive;
 	float m_currentDistance;
 	float m_cameraSpeed;
+	float m_cameraRotation = 0.0f;
+	float m_pPlayerPos;
+	glm::vec3 T, B, N;
+	glm::vec3 *m_pCameraViewDir = &T;
+	glm::vec3 *m_pCameraUpVector = &B;
 
 
 public:
