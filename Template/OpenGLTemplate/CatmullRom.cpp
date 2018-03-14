@@ -210,7 +210,7 @@ void CCatmullRom::CreateCentreline()
 
 void CCatmullRom::CreateOffsetCurves()
 {       
-    float w = 4.0f;
+    float w = 20.0f;
     for (unsigned int i = 0; i < num_samples_curve; i++)
     {
         glm::vec3 p = m_centrelinePoints[i];
@@ -222,8 +222,14 @@ void CCatmullRom::CreateOffsetCurves()
         glm::vec3 l = p - (w / 2) *N;
         glm::vec3 r = p + (w / 2) *N;
 
+		glm::vec3 lup = glm::vec3(l.x, l.y + 2.50f, l.z);
+		glm::vec3 rup = glm::vec3(r.x, r.y + 2.50f, r.z);
+
+
         m_leftOffsetPoints.push_back(l);
         m_rightOffsetPoints.push_back(r);
+		m_leftUpOffsetPoints.push_back(lup);
+		m_rightUpOffsetPoints.push_back(rup);
     }
 
     // Compute the offset curves, one left, and one right.  Store the points in m_leftOffsetPoints and m_rightOffsetPoints respectively
@@ -243,6 +249,10 @@ void CCatmullRom::CreateOffsetCurves()
         vbo.AddData(&texCoord, sizeof(glm::vec2));
         vbo.AddData(&normal, sizeof(glm::vec3));
     }
+	vbo.AddData(&m_leftOffsetPoints[0], sizeof(glm::vec3));
+	vbo.AddData(&texCoord, sizeof(glm::vec2));
+	vbo.AddData(&normal, sizeof(glm::vec3));
+
     vbo.UploadDataToGPU(GL_STATIC_DRAW);
     GLsizei stride = 2 * sizeof(glm::vec3) + sizeof(glm::vec2);
     // Vertex positions
@@ -267,6 +277,10 @@ void CCatmullRom::CreateOffsetCurves()
         vbo1.AddData(&texCoord, sizeof(glm::vec2));
         vbo1.AddData(&normal, sizeof(glm::vec3));
     }
+	vbo1.AddData(&m_rightOffsetPoints[0], sizeof(glm::vec3));
+	vbo1.AddData(&texCoord, sizeof(glm::vec2));
+	vbo1.AddData(&normal, sizeof(glm::vec3));
+
     vbo1.UploadDataToGPU(GL_STATIC_DRAW);
     // Vertex positions
     glEnableVertexAttribArray(0);
@@ -287,7 +301,7 @@ void CCatmullRom::CreateTrack()
 {
 
 	//texture mapping;
-	m_pTex1.Load("dirtpile01.jpg");
+	m_pTex1.Load("resources\\textures\\path.tif");
 	m_pTex1.SetSamplerObjectParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	m_pTex1.SetSamplerObjectParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	m_pTex1.SetSamplerObjectParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -303,19 +317,36 @@ void CCatmullRom::CreateTrack()
     CVertexBufferObject vbo;
     vbo.Create();
     vbo.Bind();
-    glm::vec2 texCoord(0.0f, 0.0f);
+	glm::vec2 texCoord0(0.0f, 0.0f);
+	glm::vec2 texCoord1(0.0f, 1.0f);
+	glm::vec2 texCoord2(1.0f, 0.0f);
+	glm::vec2 texCoord3(1.0f, 1.0f);
+
     glm::vec3 normal(0.0f, 1.0f, 0.0f);
-    for (unsigned int i = 0; i < num_samples_curve; i++)
+    for (unsigned int i = 0; i < num_samples_curve;i++)
     {
         
-        vbo.AddData(& m_leftOffsetPoints[i], sizeof(glm::vec3));
-        vbo.AddData(&texCoord, sizeof(glm::vec2));
+		glm::vec2((i)/4.0f, 0.0f);
+		vbo.AddData(& m_leftOffsetPoints[i], sizeof(glm::vec3));
+        vbo.AddData(&glm::vec2( 0.0f, (i) / 4.0f ), sizeof(glm::vec2));
         vbo.AddData(&normal, sizeof(glm::vec3));
 
-        vbo.AddData(&m_rightOffsetPoints[i], sizeof(glm::vec3));
-        vbo.AddData(&texCoord, sizeof(glm::vec2));
+		
+		vbo.AddData(&m_rightOffsetPoints[i], sizeof(glm::vec3));
+        vbo.AddData(&glm::vec2(1.0f,(i) / 4.0f) , sizeof(glm::vec2));
         vbo.AddData(&normal, sizeof(glm::vec3));
+
     }
+
+	glm::vec2((0) / 4.0f, 0.0f);
+	vbo.AddData(&m_leftOffsetPoints[0], sizeof(glm::vec3));
+	vbo.AddData(&glm::vec2(0.0f, (0) / 4.0f), sizeof(glm::vec2));
+	vbo.AddData(&normal, sizeof(glm::vec3));
+
+
+	vbo.AddData(&m_rightOffsetPoints[0], sizeof(glm::vec3));
+	vbo.AddData(&glm::vec2(1.0f, (0) / 4.0f), sizeof(glm::vec2));
+	vbo.AddData(&normal, sizeof(glm::vec3));
 
     vbo.UploadDataToGPU(GL_STATIC_DRAW);
     GLsizei stride = 2 * sizeof(glm::vec3) + sizeof(glm::vec2);
@@ -329,6 +360,145 @@ void CCatmullRom::CreateTrack()
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(glm::vec3)
         + sizeof(glm::vec2)));
+
+}
+
+void CCatmullRom::CreateLeftSideFence()
+{
+
+	//texture mapping;
+	m_pTex2.Load("resources\\textures\\fence.png");
+	m_pTex2.SetSamplerObjectParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	m_pTex2.SetSamplerObjectParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	m_pTex2.SetSamplerObjectParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+	m_pTex2.SetSamplerObjectParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
+
+	// Compute the offset curves, one left, and one right.  Store the points in m_leftOffsetPoints and m_rightOffsetPoints respectively
+	// Generate two VAOs called m_vaoLeftOffsetCurve and m_vaoRightOffsetCurve, each with a VBO, and get the offset curve points on the graphics card
+	// Note it is possible to only use one VAO / VBO with all the points instead.
+	glGenVertexArrays(1, &m_vaoSideFence);
+	glBindVertexArray(m_vaoSideFence);
+	CVertexBufferObject vbo;
+	vbo.Create();
+	vbo.Bind();
+	glm::vec2 texCoord0(0.0f, 0.0f);
+	glm::vec2 texCoord1(0.0f, 1.0f);
+	glm::vec2 texCoord2(1.0f, 0.0f);
+	glm::vec2 texCoord3(1.0f, 1.0f);
+
+	glm::vec3 normal(0.0f, 1.0f, 0.0f);
+	for (unsigned int i = 0; i < num_samples_curve; i++)
+	{
+
+		vbo.AddData(&m_leftUpOffsetPoints[i], sizeof(glm::vec3));
+		vbo.AddData(&glm::vec2((i) / 4.0f,1.0f), sizeof(glm::vec2));
+		vbo.AddData(&normal, sizeof(glm::vec3));
+
+		glm::vec2((i) / 4.0f, 0.0f);
+		vbo.AddData(&m_leftOffsetPoints[i], sizeof(glm::vec3));
+		vbo.AddData(&glm::vec2((i) / 4.0f,0.0f), sizeof(glm::vec2));
+		vbo.AddData(&normal, sizeof(glm::vec3));
+
+
+		
+
+	}
+
+
+	vbo.AddData(&m_leftUpOffsetPoints[0], sizeof(glm::vec3));
+	vbo.AddData(&glm::vec2(1.0f, (0) / 4.0f), sizeof(glm::vec2));
+	vbo.AddData(&normal, sizeof(glm::vec3));
+
+	glm::vec2((0) / 4.0f, 0.0f);
+	vbo.AddData(&m_leftOffsetPoints[0], sizeof(glm::vec3));
+	vbo.AddData(&glm::vec2(0.0f, (0) / 4.0f), sizeof(glm::vec2));
+	vbo.AddData(&normal, sizeof(glm::vec3));
+
+
+
+	vbo.UploadDataToGPU(GL_STATIC_DRAW);
+	GLsizei stride = 2 * sizeof(glm::vec3) + sizeof(glm::vec2);
+	// Vertex positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
+	// Texture coordinates
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)sizeof(glm::vec3));
+	// Normal vectors
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(glm::vec3)
+		+ sizeof(glm::vec2)));
+
+}
+
+void CCatmullRom::CreateRightSideFence()
+{
+
+	//texture mapping;
+	m_pTex3.Load("resources\\textures\\fence.png");
+	m_pTex3.SetSamplerObjectParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	m_pTex3.SetSamplerObjectParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	m_pTex3.SetSamplerObjectParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+	m_pTex3.SetSamplerObjectParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
+
+	// Compute the offset curves, one left, and one right.  Store the points in m_leftOffsetPoints and m_rightOffsetPoints respectively
+	// Generate two VAOs called m_vaoLeftOffsetCurve and m_vaoRightOffsetCurve, each with a VBO, and get the offset curve points on the graphics card
+	// Note it is possible to only use one VAO / VBO with all the points instead.
+	glGenVertexArrays(1, &m_vaoSideFence2);
+	glBindVertexArray(m_vaoSideFence2);
+	CVertexBufferObject vbo;
+	vbo.Create();
+	vbo.Bind();
+	glm::vec2 texCoord0(0.0f, 0.0f);
+	glm::vec2 texCoord1(0.0f, 1.0f);
+	glm::vec2 texCoord2(1.0f, 0.0f);
+	glm::vec2 texCoord3(1.0f, 1.0f);
+
+	glm::vec3 normal(0.0f, 1.0f, 0.0f);
+	for (unsigned int i = 0; i < num_samples_curve; i++)
+	{
+		glm::vec2((i) / 4.0f, 0.0f);
+		vbo.AddData(&m_rightOffsetPoints[i], sizeof(glm::vec3));
+		vbo.AddData(&glm::vec2((i) / 4.0f, 0.0f), sizeof(glm::vec2));
+		vbo.AddData(&normal, sizeof(glm::vec3));
+
+		vbo.AddData(&m_rightUpOffsetPoints[i], sizeof(glm::vec3));
+		vbo.AddData(&glm::vec2((i) / 4.0f, 1.0f), sizeof(glm::vec2));
+		vbo.AddData(&normal, sizeof(glm::vec3));
+
+
+
+	}
+
+	glm::vec2((0) / 4.0f, 0.0f);
+	vbo.AddData(&m_rightOffsetPoints[0], sizeof(glm::vec3));
+	vbo.AddData(&glm::vec2(0.0f, (0) / 4.0f), sizeof(glm::vec2));
+	vbo.AddData(&normal, sizeof(glm::vec3));
+
+	vbo.AddData(&m_rightUpOffsetPoints[0], sizeof(glm::vec3));
+	vbo.AddData(&glm::vec2(1.0f, (0) / 4.0f), sizeof(glm::vec2));
+	vbo.AddData(&normal, sizeof(glm::vec3));
+
+	
+
+
+
+	vbo.UploadDataToGPU(GL_STATIC_DRAW);
+	GLsizei stride = 2 * sizeof(glm::vec3) + sizeof(glm::vec2);
+	// Vertex positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
+	// Texture coordinates
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)sizeof(glm::vec3));
+	// Normal vectors
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(glm::vec3)
+		+ sizeof(glm::vec2)));
 
 }
 
@@ -350,21 +520,41 @@ void CCatmullRom::RenderOffsetCurves()
     // Bind the VAO m_vaoRightOffsetCurve and render it
 
     glBindVertexArray(m_vaoLeftOffsetCurve); 
-    glDrawArrays(GL_LINE_LOOP, 0, num_samples_curve);
+    glDrawArrays(GL_LINE_LOOP, 0, num_samples_curve+1);
     glBindVertexArray(m_vaoRightOffsetCurve);
-    glDrawArrays(GL_LINE_STRIP,0,num_samples_curve);
+    glDrawArrays(GL_LINE_STRIP,0,num_samples_curve+1);
 
 }
 
 
 void CCatmullRom::RenderTrack()
 {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     // Bind the VAO m_vaoTrack and render it
     glBindVertexArray(m_vaoTrack);
 	m_pTex1.Bind();
 	//glBindTexture(GL_TEXTURE_2D,m_vaoTrack);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 2*num_samples_curve);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 2*num_samples_curve+2);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void CCatmullRom::RenderLeftSideFence() {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	// Bind the VAO m_vaoSideFence and render it
+	glBindVertexArray(m_vaoSideFence);
+	m_pTex2.Bind();
+	//glBindTexture(GL_TEXTURE_2D,m_vaoSideFence);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 2 * num_samples_curve + 2);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void CCatmullRom::RenderRightSideFence() {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	// Bind the VAO m_vaoSideFence and render it
+	glBindVertexArray(m_vaoSideFence2);
+	m_pTex3.Bind();
+	//glBindTexture(GL_TEXTURE_2D,m_vaoSideFence);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 2 * num_samples_curve + 2);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 

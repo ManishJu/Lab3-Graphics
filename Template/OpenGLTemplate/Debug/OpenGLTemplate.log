@@ -1,5 +1,7 @@
 ﻿  Game.cpp
-Game.cpp(334): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-Game.cpp(558): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+Game.cpp(482): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
+Game.cpp(504): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+Game.cpp(727): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+Game.cpp(730): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
   OpenGLTemplate.vcxproj -> D:\All other git repos\Lab CG\Lab3-Graphics\Template\Debug\OpenGLTemplate.exe
   OpenGLTemplate.vcxproj -> D:\All other git repos\Lab CG\Lab3-Graphics\Template\Debug\OpenGLTemplate.pdb (Full PDB)

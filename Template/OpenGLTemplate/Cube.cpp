@@ -1,15 +1,18 @@
 #include "Cube.h"
+
 CCube::CCube()
 {
 	m_vao = NULL;
 }
+
 CCube::~CCube()
 {
 	Release();
 }
-void CCube::Create(string filename)
+
+void CCube::Create()
 {
-	m_texture.Load(filename);
+	m_texture.Load("resources//Textures//Crate.jpg");
 	m_texture.SetSamplerObjectParameter(GL_TEXTURE_MIN_FILTER,
 		GL_LINEAR_MIPMAP_LINEAR);
 	m_texture.SetSamplerObjectParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -129,11 +132,12 @@ void CCube::Create(string filename)
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride,
 		(void*)(sizeof(glm::vec3) + sizeof(glm::vec2)));
 }
+
 void CCube::Render()
 {
 	glBindVertexArray(m_vao);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	//m_texture.Bind();
+	m_texture.Bind();
 	// Call glDrawArrays to render each side
 	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
 	glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
@@ -145,6 +149,7 @@ void CCube::Render()
 
 
 }
+
 void CCube::Release()
 {
 	m_texture.Release();
@@ -152,11 +157,4 @@ void CCube::Release()
 	m_vbo.Release();
 }
 
-Cube::Cube()
-{
-}
 
-
-Cube::~Cube()
-{
-}

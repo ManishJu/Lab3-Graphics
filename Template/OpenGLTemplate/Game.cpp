@@ -35,6 +35,8 @@ Source code drawn from a number of sources and examples, including contributions
 #include "OpenAssetImportMesh.h"
 #include "Audio.h"
 #include "CatmullRom.h"
+#include "Cube.h"
+#include "Tetrahedron.h"
 
 // Constructor
 Game::Game()
@@ -50,6 +52,15 @@ Game::Game()
 	m_pHighResolutionTimer = NULL;
 	m_pAudio = NULL;
 	m_pPath = NULL;
+	m_pCube = NULL;
+	m_pTetrahedron = NULL;
+	m_pTree1 = NULL;
+	m_pApple = NULL;
+	m_pRabbit = NULL;
+	m_pFlowersSet1 = NULL;
+	m_pFLowersSet2 =NULL;
+	m_pRock = NULL;
+	
 
 	m_dt = 0.0;
 	m_framesPerSecond = 0;
@@ -74,6 +85,16 @@ Game::~Game()
 	delete m_pSphere;
 	delete m_pAudio;
 	delete m_pPath;
+	delete m_pCube;
+	delete m_pTetrahedron;
+	delete m_pTree1;
+	delete m_pApple;
+	delete m_pRabbit;
+	delete m_pFlowersSet1;
+	delete m_pFLowersSet2;
+	delete m_pRock;
+	for (auto it = m_pPlants.begin(); it != m_pPlants.end(); ++it)	delete (*it);
+	m_pPlants.clear();
 
 	if (m_pShaderPrograms != NULL) {
 		for (unsigned int i = 0; i < m_pShaderPrograms->size(); i++)
@@ -88,6 +109,21 @@ Game::~Game()
 // Initialisation:  This method only runs once at startup
 void Game::Initialise() 
 {
+
+	for (int i = 0; i < 100; i++) {
+		plantPos.push_back(glm::vec3(rand() % 150 - 45, 0, (rand() % 450) -450));
+		
+	}
+
+	for (int i = 0; i < 100; i++) {
+		plantPos2.push_back(glm::vec4(rand() % 150 - 45, 0, (rand() % 450) - 450,rand()% 8));
+		
+	}
+	for (int i = 0; i < 100; i++) {
+		plantPos2.push_back(glm::vec4((rand() % 85) + 125, 0, -180 - (rand() % 320), rand() % 8));
+
+	}
+
 	// Set the clear colour and depth
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClearDepth(1.0f);
@@ -105,7 +141,17 @@ void Game::Initialise()
 	m_pSphere = new CSphere;
 	m_pAudio = new CAudio;
 	m_pPath = new CCatmullRom;
-
+	m_pCube = new CCube;
+	m_pTetrahedron = new Tetrahedron;
+	m_pTree1 = new COpenAssetImportMesh;
+	m_pApple = new COpenAssetImportMesh;
+	m_pRabbit = new COpenAssetImportMesh;
+	m_pFlowersSet1 = new COpenAssetImportMesh;
+	m_pFLowersSet2 = new COpenAssetImportMesh;
+	m_pRock = new COpenAssetImportMesh;
+	
+	m_pPlants.reserve(10);
+	for (int i = 0; i < 10; ++i) m_pPlants.emplace_back(new COpenAssetImportMesh);
 	
 
 	RECT dimensions = m_gameWindow.GetDimensions();
@@ -169,6 +215,25 @@ void Game::Initialise()
 	// Load some meshes in OBJ format
 	m_pBarrelMesh->Load("resources\\models\\Barrel\\Barrel02.obj");  // Downloaded from http://www.psionicgames.com/?page_id=24 on 24 Jan 2013
 	m_pHorseMesh->Load("resources\\models\\Horse\\Horse2.obj");  // Downloaded from http://opengameart.org/content/horse-lowpoly on 24 Jan 2013
+	m_pTree1->Load("resources\\models\\Trees\\tree2.obj");
+	m_pApple->Load("resources\\models\\Apple\\apple.obj");
+	m_pRabbit->Load("resources\\models\\Rabbit\\rabbit.obj");
+	m_pFlowersSet1->Load("resources\\models\\Flowers\\Flowers1\\flowers.obj");
+	m_pRock->Load("resources\\models\\rock\\rock.obj");
+	//loading the 9 plant models in the vector
+	{
+		m_pPlants[0]->Load("resources\\models\\Plants\\one.obj");
+		m_pPlants[1]->Load("resources\\models\\Plants\\two.obj");
+		m_pPlants[2]->Load("resources\\models\\Plants\\three.obj");
+		m_pPlants[3]->Load("resources\\models\\Plants\\four.obj");
+		m_pPlants[4]->Load("resources\\models\\Plants\\five.obj");
+		m_pPlants[5]->Load("resources\\models\\Plants\\six.obj");
+		m_pPlants[6]->Load("resources\\models\\Plants\\seven.obj");
+		m_pPlants[7]->Load("resources\\models\\Plants\\eight.obj");
+		m_pPlants[8]->Load("resources\\models\\Plants\\nine.obj");
+		//m_pPlants[0]->Load("resources\\models\\rock\\Plants\\ten.obj");
+
+	}
 
 	// Create a sphere
 	m_pSphere->Create("resources\\textures\\", "dirtpile01.jpg", 25, 25);  // Texture downloaded from http://www.psionicgames.com/?page_id=26 on 24 Jan 2013
@@ -177,7 +242,7 @@ void Game::Initialise()
 	// Initialise audio and play background music
 	m_pAudio->Initialise();
 	m_pAudio->LoadEventSound("Resources\\Audio\\Boing.wav");					// Royalty free sound from freesound.org
-	m_pAudio->LoadMusicStream("Resources\\Audio\\DST-Garote.mp3");	// Royalty free music from http://www.nosoapradio.us/
+	m_pAudio->LoadMusicStream("Resources\\Audio\\On Horse Day - Zelda Breath of the Wild Soundtrack.mp3");	// Royalty free music from http://www.nosoapradio.us/
 	m_pAudio->PlayMusicStream();
 
 	//m_pCamera->Set(glm::vec3(0,300,0), glm::vec3(0,0,0), glm::vec3(1,0,0));
@@ -189,15 +254,20 @@ void Game::Initialise()
 	 m_pPath->CreateCentreline();
 	 m_pPath->CreateOffsetCurves();
 	 m_pPath->CreateTrack();
+	 m_pCube->Create();
+	 m_pTetrahedron->Create();
+	 m_pPath->CreateLeftSideFence();
+	 m_pPath->CreateRightSideFence();
+	 
 
 }
 
 // Render method runs repeatedly in a loop
-void Game::Render() 
+void Game::Render()
 {
-	
+
 	// Clear the buffers and enable depth testing (z-buffering)
-	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
 	// Set up a matrix stack
@@ -210,20 +280,24 @@ void Game::Render()
 	pMainProgram->SetUniform("bUseTexture", true);
 	pMainProgram->SetUniform("sampler0", 0);
 	// Note: cubemap and non-cubemap textures should not be mixed in the same texture unit.  Setting unit 10 to be a cubemap texture.
-	int cubeMapTextureUnit = 10; 
+	int cubeMapTextureUnit = 10;
 	pMainProgram->SetUniform("CubeMapTex", cubeMapTextureUnit);
-	
+
 
 	// Set the projection matrix
 	pMainProgram->SetUniform("matrices.projMatrix", m_pCamera->GetPerspectiveProjectionMatrix());
 
 	// Call LookAt to create the view matrix and put this on the modelViewMatrix stack. 
 	// Store the view matrix and the normal matrix associated with the view matrix for later (they're useful for lighting -- since lighting is done in eye coordinates)
+
+	//if(turnOnThirdPersonMode)  modelViewMatrixStack.Rotate(glm::cross(m_pCamera->GetView(), m_pCamera->GetUpVector()), -30.0f);
 	modelViewMatrixStack.LookAt(m_pCamera->GetPosition(), m_pCamera->GetView(), m_pCamera->GetUpVector());
 	glm::mat4 viewMatrix = modelViewMatrixStack.Top();
 	glm::mat3 viewNormalMatrix = m_pCamera->ComputeNormalMatrix(viewMatrix);
+	//if (turnOnThirdPersonMode)  modelViewMatrixStack.Rotate(glm::cross(m_pCamera->GetView(), m_pCamera->GetUpVector()), -30.0f);
 
-	
+
+
 	// Set light and materials in main shader program
 	glm::vec4 lightPosition1 = glm::vec4(-100, 100, -100, 1); // Position of light source *in world coordinates*
 	pMainProgram->SetUniform("light1.position", viewMatrix*lightPosition1); // Position of light source *in eye coordinates*
@@ -234,25 +308,25 @@ void Game::Render()
 	pMainProgram->SetUniform("material1.Md", glm::vec3(0.0f));	// Diffuse material reflectance
 	pMainProgram->SetUniform("material1.Ms", glm::vec3(0.0f));	// Specular material reflectance
 	pMainProgram->SetUniform("material1.shininess", 15.0f);		// Shininess material property
-		
+
 
 	// Render the skybox and terrain with full ambient reflectance 
 	modelViewMatrixStack.Push();
-		pMainProgram->SetUniform("renderSkybox", true);
-		// Translate the modelview matrix to the camera eye point so skybox stays centred around camera
-		glm::vec3 vEye = m_pCamera->GetPosition();
-		modelViewMatrixStack.Translate(vEye);
-		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		m_pSkybox->Render(cubeMapTextureUnit);
-		pMainProgram->SetUniform("renderSkybox", false);
+	pMainProgram->SetUniform("renderSkybox", true);
+	// Translate the modelview matrix to the camera eye point so skybox stays centred around camera
+	glm::vec3 vEye = m_pCamera->GetPosition();
+	modelViewMatrixStack.Translate(vEye);
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	m_pSkybox->Render(cubeMapTextureUnit);
+	pMainProgram->SetUniform("renderSkybox", false);
 	modelViewMatrixStack.Pop();
 
 	// Render the planar terrain
 	modelViewMatrixStack.Push();
-		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		m_pPlanarTerrain->Render();
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	m_pPlanarTerrain->Render();
 	modelViewMatrixStack.Pop();
 
 
@@ -261,61 +335,175 @@ void Game::Render()
 	pMainProgram->SetUniform("material1.Md", glm::vec3(0.5f));	// Diffuse material reflectance
 	pMainProgram->SetUniform("material1.Ms", glm::vec3(1.0f));	// Specular material reflectance	
 
-
+	{
 	// Render the horse 
 	modelViewMatrixStack.Push();
-		modelViewMatrixStack.Translate(glm::vec3(0.0f, 0.0f, 0.0f));
+	modelViewMatrixStack.Translate(glm::vec3(0.0f, 0.0f, 0.0f));
+	modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
+	modelViewMatrixStack.Scale(2.5f);
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	m_pHorseMesh->Render();
+	modelViewMatrixStack.Pop();
+
+	// Render the crate box (cube) 
+	modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(glm::vec3(0.0f - 70.0f, 2.0f, 0.0f -10.0f));
 		modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
 		modelViewMatrixStack.Scale(2.5f);
 		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		m_pHorseMesh->Render();
+		m_pCube->Render();
+	modelViewMatrixStack.Pop();
+
+	// Render the tetrahedron 
+	modelViewMatrixStack.Push();
+	modelViewMatrixStack.Translate(glm::vec3( 170.0f, 50.0f, - 320.0f));
+	modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
+	modelViewMatrixStack.Scale(50.0f);
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	m_pTetrahedron->Render();
+	modelViewMatrixStack.Pop();
+
+	// Render the big  tree
+	modelViewMatrixStack.Push();
+	modelViewMatrixStack.Translate(glm::vec3(0.0f - 50.0f, 2.0f, 0.0f - 10.0f));
+	modelViewMatrixStack.Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
+	modelViewMatrixStack.Scale(100.0f);
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	m_pTree1->Render();
+	modelViewMatrixStack.Pop();
+	
+
+	// Render the second big tree
+	modelViewMatrixStack.Push();
+	modelViewMatrixStack.Translate(glm::vec3(+ 180.0f, 2.0f, - 40.0f));
+	modelViewMatrixStack.Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
+	modelViewMatrixStack.Scale(100.0f);
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	m_pTree1->Render();
+	modelViewMatrixStack.Pop();
+
+	// Render the Rabbit
+	modelViewMatrixStack.Push();
+	modelViewMatrixStack.Translate(glm::vec3(0.0f - 80.0f, 0.0f, 0.0f - 10.0f));
+	modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
+	modelViewMatrixStack.Scale(5.0f);
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	m_pRabbit->Render();
 	modelViewMatrixStack.Pop();
 
 
-	
+	// Render the apple
+	modelViewMatrixStack.Push();
+	modelViewMatrixStack.Translate(glm::vec3(0.0f - 80.0f, 2.0f, 0.0f - 10.0f));
+	modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
+	modelViewMatrixStack.Scale(40.0f);
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//m_pApple->Render();
+	modelViewMatrixStack.Pop();
+
+
 	// Render the barrel 
 	modelViewMatrixStack.Push();
-		modelViewMatrixStack.Translate(glm::vec3(100.0f, 0.0f, 0.0f));
-		modelViewMatrixStack.Scale(5.0f);
-		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		m_pBarrelMesh->Render();
+	modelViewMatrixStack.Translate(glm::vec3(100.0f, 0.0f, 0.0f));
+	modelViewMatrixStack.Scale(5.0f);
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	m_pBarrelMesh->Render();
 	modelViewMatrixStack.Pop();
-	
+
 
 	// Render the sphere
 	modelViewMatrixStack.Push();
-		modelViewMatrixStack.Translate(glm::vec3(0.0f, 2.0f, 150.0f));
-		modelViewMatrixStack.Scale(2.0f);
-		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-		//pMainProgram->SetUniform("bUseTexture", false);
-		m_pSphere->Render();
+	modelViewMatrixStack.Translate(glm::vec3(0.0f, 2.0f, 150.0f));
+	modelViewMatrixStack.Scale(2.0f);
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+	//pMainProgram->SetUniform("bUseTexture", false);
+	m_pSphere->Render();
 	modelViewMatrixStack.Pop();
-		
+
 
 	modelViewMatrixStack.Push();
-	pMainProgram->SetUniform("bUseTexture", false); // turn off texturing
+	pMainProgram->SetUniform("bUseTexture", true); // turn off texturing
 	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 	pMainProgram->SetUniform("matrices.normalMatrix",
 		m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 	// Render your object here
-	m_pPath->RenderCentreline();
-	m_pPath->RenderOffsetCurves();
+	//m_pPath->RenderCentreline();
+	//m_pPath->RenderOffsetCurves();
 	m_pPath->RenderTrack();
+	m_pPath->RenderLeftSideFence();
+	m_pPath->RenderRightSideFence();
 	modelViewMatrixStack.Pop();
 
-	//modelViewMatrixStack.Push();
-	//pMainProgram->SetUniform("bUseTexture", false); // turn off texturing
-	//pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	//pMainProgram->SetUniform("matrices.normalMatrix",
-	//	m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	//// Render your object here
-	//m_pPath->RenderTrack();
-	//modelViewMatrixStack.Pop();
-	// Draw the 2D graphics after the 3D graphics
+}
+
+	modelViewMatrixStack.Push();
+	modelViewMatrixStack.Translate(glm::vec3(0.0f, 1.0f, 90.0f));
+	modelViewMatrixStack.Scale(15.0f);
+	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+	//pMainProgram->SetUniform("bUseTexture", false);
+	m_pFlowersSet1->Render();
+	modelViewMatrixStack.Pop();
+	
+	for (int i = 1; i < 100; i++) {
+
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(plantPos[i]);
+		modelViewMatrixStack.Scale(15.0f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		//pMainProgram->SetUniform("bUseTexture", false);
+		m_pFlowersSet1->Render();
+		modelViewMatrixStack.Pop();
+
+	}
+
+	for (int i = 0; i < 20; i++) {
+
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(plantPos2[i].x, plantPos2[i].y, plantPos2[i].z);
+		modelViewMatrixStack.Scale(15.0f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		//pMainProgram->SetUniform("bUseTexture", false);
+		m_pPlants[plantPos2[i].w]->Render();
+		modelViewMatrixStack.Pop();
+
+	}
+
+	for (int i = 110; i < 120; i++) {
+
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(plantPos2[i].x, plantPos2[i].y, plantPos2[i].z);
+		modelViewMatrixStack.Scale(15.0f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		//pMainProgram->SetUniform("bUseTexture", false);
+		m_pPlants[plantPos2[i].w]->Render();
+		modelViewMatrixStack.Pop();
+
+	}
+	
+
+
 	DisplayFrameRate();
 
 	// Swap buffers to show the rendered image
@@ -348,10 +536,9 @@ void Game::Update()
 	if (turnOnThirdPersonMode) {
 		p -= 5.0f*T;
 		p.y += 4.0f;
-		//*m_pCameraUpVector = glm::rotate(glm::vec3(0, 1, 0), m_cameraRotation, B);
-		//glm::rotate(glm::vec3(0, 1, 0), 0.5f, B);
-
+		
 		*m_pCameraUpVector = glm::rotate(*m_pCameraUpVector, m_cameraRotation, N);
+		*m_pCameraViewDir = glm::rotate(*m_pCameraViewDir, m_cameraRotation, N);
 
 	}
 	//m_pCameraUpVector = &bThirdView;
@@ -361,7 +548,7 @@ void Game::Update()
 	//case 2
 	//p += 1.0f*T; //moving forward
 	p += 2.0f*pos; //position change on the left side of track
-	m_pCamera->Set(p, p + 1.0f*(*m_pCameraViewDir), *m_pCameraUpVector);
+	//m_pCamera->Set(p, p + 1.0f*(*m_pCameraViewDir), *m_pCameraUpVector);
 
 	
 
@@ -370,7 +557,7 @@ void Game::Update()
 	/*static float t = 0.0f;
 	t += 0.0005f * (float)m_dt;
 	if (t > 1.0f) t = 0.0f;*/
-	//m_pCamera->Update(m_dt);
+	m_pCamera->Update(m_dt);
 	//m_pCamera->Set( p, m_pCamera->GetView(), m_pCamera->GetUpVector());
 	//m_pCamera->Set(p,p + 10.0f*T, m_pCamera->GetUpVector());
 	//m_pPath->RenderPath();
@@ -555,7 +742,10 @@ LRESULT Game::ProcessEvents(HWND window,UINT message, WPARAM w_param, LPARAM l_p
 			break;
 
 		case 'W':
-			m_cameraRotation += m_dt*0.1f;
+			m_cameraRotation -= m_dt*0.01f;
+			break;
+		case 'S':
+			m_cameraRotation += m_dt*0.01f;
 			break;
 
 

@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include "GameWindow.h"
+#include <memory>
 
 // Classes used in game.  For a new class, declare it here and provide a pointer to an object of this class below.  Then, in Game.cpp, 
 // include the header.  In the Game constructor, set the pointer to NULL and in Game::Initialise, create a new object.  Don't forget to 
@@ -17,6 +18,9 @@ class CSphere;
 class COpenAssetImportMesh;
 class CAudio;
 class CCatmullRom;
+class CCube;
+class Tetrahedron;
+//class glutil::MatrixStack;
 
 class Game {
 private:
@@ -38,7 +42,20 @@ private:
 	CAudio *m_pAudio;
 	glm::vec3 p0, p1, p2, p3;
 	CCatmullRom *m_pPath;
+	CCube *m_pCube;
+	Tetrahedron *m_pTetrahedron;
 
+	//My meshes:
+	COpenAssetImportMesh *m_pTree1;
+	COpenAssetImportMesh *m_pApple;
+	COpenAssetImportMesh *m_pRabbit;
+	COpenAssetImportMesh *m_pFlowersSet1;
+	COpenAssetImportMesh *m_pFLowersSet2;
+	COpenAssetImportMesh *m_pRock;
+	std::vector<COpenAssetImportMesh*> m_pPlants;
+
+
+	//glutil::MatrixStack modelViewMatrixStack;
 
 	// Some other member variables
 	bool turnOnThirdPersonMode = false;
@@ -52,6 +69,10 @@ private:
 	glm::vec3 T, B, N;
 	glm::vec3 *m_pCameraViewDir = &T;
 	glm::vec3 *m_pCameraUpVector = &B;
+
+	std::vector<glm::vec3> plantPos;
+	std::vector<glm::vec3> rockPos;
+	std::vector<glm::vec4> plantPos2;
 
 
 public:

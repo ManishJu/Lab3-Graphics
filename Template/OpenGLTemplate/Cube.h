@@ -8,7 +8,7 @@ class CCube
 public:
 	CCube();
 	~CCube();
-	void Create(string filename);
+	void Create();
 	void Render();
 	void Release();
 private:
@@ -17,9 +17,3 @@ private:
 	CTexture m_texture;
 };
 
-class Cube
-{
-public:
-	Cube();
-	~Cube();
-};
