@@ -400,6 +400,8 @@ void Game::Render()
 
 	//Render stuff;
 	{
+		glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		//Render flower beside the path
 		{
 			modelViewMatrixStack.Push();
@@ -437,8 +439,6 @@ void Game::Render()
 			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 			// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
 			//pMainProgram->SetUniform("bUseTexture", false);
-			glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 			m_pPlants[plantPos2[i].w]->Render();
 			modelViewMatrixStack.Pop();
 
@@ -453,8 +453,6 @@ void Game::Render()
 			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 			// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
 			//pMainProgram->SetUniform("bUseTexture", false);
-			glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 			m_pPlants[plantPos2[i].w]->Render();
 			modelViewMatrixStack.Pop();
 
@@ -503,7 +501,6 @@ void Game::Render()
 			modelViewMatrixStack.Scale(100.0f);
 			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			m_pTree1->Render();
 			modelViewMatrixStack.Pop();
 		}
@@ -517,7 +514,6 @@ void Game::Render()
 			modelViewMatrixStack.Scale(100.0f);
 			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			m_pTree1->Render();
 			modelViewMatrixStack.Pop();
 		}
@@ -531,7 +527,6 @@ void Game::Render()
 			modelViewMatrixStack.Scale(40.0f);
 			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			m_pApple->Render();
 			modelViewMatrixStack.Pop();
 		}
@@ -587,7 +582,6 @@ void Game::Render()
 		modelViewMatrixStack.Scale(10.0f);
 		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		m_pCollectible[i]->Render();
 		modelViewMatrixStack.Pop();
 	}
@@ -599,7 +593,6 @@ void Game::Render()
 		modelViewMatrixStack.Scale(0.3f);
 		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		m_pObstacle[i]->Render();
 		modelViewMatrixStack.Pop();
 	}
@@ -632,26 +625,7 @@ void Game::Render()
 	m_pRabbit->Render();
 	modelViewMatrixStack.Pop();
 
-	// Render the bunny
-	//modelViewMatrixStack.Push(); 
-	//modelViewMatrixStack.Translate(glm::vec3(0.0f, 5.0f, 50.0f));
-	//modelViewMatrixStack.Scale(5.0f);
-	//pSphereProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	//pSphereProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	//m_pRabbit->Render();
-	//modelViewMatrixStack.Pop();
-
-	// Render the bunny
-	/*modelViewMatrixStack.Push();
-	modelViewMatrixStack.Translate(m_pPlayerPos);
-	modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 90.0f);
-	modelViewMatrixStack.Scale(5.0f);
-	modelViewMatrixStack *= m_pPlayerOrientation;
-	pSphereProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pSphereProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-	m_pRabbit->Render();
-	modelViewMatrixStack.Pop();*/
-
+	
 
 	DisplayFrameRate();
 
