@@ -1,39 +1,16 @@
-﻿  Audio.cpp
-  Camera.cpp
-  CatmullRom.cpp
-CatmullRom.cpp(190): warning C4018: '<': signed/unsigned mismatch
-CatmullRom.cpp(214): warning C4018: '<': signed/unsigned mismatch
-CatmullRom.cpp(246): warning C4018: '<': signed/unsigned mismatch
-CatmullRom.cpp(274): warning C4018: '<': signed/unsigned mismatch
-CatmullRom.cpp(326): warning C4018: '<': signed/unsigned mismatch
-CatmullRom.cpp(392): warning C4018: '<': signed/unsigned mismatch
-CatmullRom.cpp(462): warning C4018: '<': signed/unsigned mismatch
-  Cube.cpp
-  Cubemap.cpp
-  FreeTypeFont.cpp
-  Game.cpp
-Game.cpp(486): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
-Game.cpp(500): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
-Game.cpp(522): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-Game.cpp(745): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
-Game.cpp(748): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-  GameWindow.cpp
-  HighResolutionTimer.cpp
-  MatrixStack.cpp
-  OpenAssetImportMesh.cpp
-  Plane.cpp
-  Shaders.cpp
-  Skybox.cpp
-  Source.cpp
-  Sphere.cpp
-  Tetrahedron.cpp
-  Texture.cpp
-  VertexBufferObject.cpp
-  VertexBufferObjectIndexed.cpp
+﻿  Game.cpp
+Game.cpp(313): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Game.cpp(321): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Game.cpp(438): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
+Game.cpp(452): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
+Game.cpp(665): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+Game.cpp(688): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Game.cpp(919): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+Game.cpp(922): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
   Generating code
-  35 of 1364 functions ( 2.6%) were compiled, the rest were copied from previous compilation.
+  1 of 1370 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    9 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   OpenGLTemplate.vcxproj -> D:\All other git repos\Lab CG\Lab3-Graphics\Template\Release\OpenGLTemplate.exe
   OpenGLTemplate.vcxproj -> D:\All other git repos\Lab CG\Lab3-Graphics\Template\Release\OpenGLTemplate.pdb (Full PDB)

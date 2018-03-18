@@ -11,8 +11,8 @@ public:
 	GameWindow();
 
 	enum {
-		SCREEN_WIDTH = 1200,
-		SCREEN_HEIGHT = 800,
+		SCREEN_WIDTH = 1336,
+		SCREEN_HEIGHT = 768,
 	};
 
 	HDC Init(HINSTANCE hinstance);

@@ -53,26 +53,35 @@ private:
 	COpenAssetImportMesh *m_pFLowersSet2;
 	COpenAssetImportMesh *m_pRock;
 	std::vector<COpenAssetImportMesh*> m_pPlants;
+	std::vector<COpenAssetImportMesh*> m_pCollectible;
+	std::vector<COpenAssetImportMesh*> m_pObstacle;
+
 
 
 	//glutil::MatrixStack modelViewMatrixStack;
 
 	// Some other member variables
 	bool turnOnThirdPersonMode = false;
+	bool turnOnTopView = false;
 	double m_dt;
 	int m_framesPerSecond;
 	bool m_appActive;
 	float m_currentDistance;
 	float m_cameraSpeed;
 	float m_cameraRotation = 0.0f;
-	float m_pPlayerPos;
+	float m_pPlayerPosChecker;
+	float m_tt;
 	glm::vec3 T, B, N;
 	glm::vec3 *m_pCameraViewDir = &T;
 	glm::vec3 *m_pCameraUpVector = &B;
+	glm::vec3 m_pPlayerPos;
+	glm::mat4 m_pPlayerOrientation;
 
 	std::vector<glm::vec3> plantPos;
 	std::vector<glm::vec3> rockPos;
 	std::vector<glm::vec4> plantPos2;
+	std::vector<glm::vec3> collectiblePos;
+	std::vector<glm::vec3> m_pObstaclesPos;
 
 
 public:
@@ -91,6 +100,8 @@ private:
 	HINSTANCE m_hInstance;
 	int m_frameCount;
 	double m_elapsedTime;
-
+	unsigned int m_pPointsCollected;
+	unsigned int m_pLapsCompleted;
+	long long int m_pCounter = 0;
 
 };
