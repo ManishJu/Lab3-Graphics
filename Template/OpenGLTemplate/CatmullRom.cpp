@@ -60,6 +60,77 @@ void CCatmullRom::SetControlPoints()
     m_controlPoints.push_back(glm::vec3(71, 5, -71));*/
 }
 
+void CCatmullRom::SetControlPointsButterflyPath(){
+
+    vector<glm::vec3> all = { 
+        glm::vec3(0,10,100),
+        glm::vec3(-10,10,90),
+        glm::vec3(-30,10,75),
+        glm::vec3(-10,10,60),
+        glm::vec3(0,10,50),
+        glm::vec3(25,10,60),
+        glm::vec3(40,10,75),
+        glm::vec3(25,10,90),
+
+         glm::vec3(0,8,100),
+        glm::vec3(-10,8,90),
+        glm::vec3(-30,8,75),
+        glm::vec3(-10,8,60),
+        glm::vec3(0,8,50),
+        glm::vec3(25,8,60),
+        glm::vec3(40,8,75),
+        glm::vec3(25,8,90),
+
+        glm::vec3(0,6,100),
+        glm::vec3(-10,6,90),
+        glm::vec3(-30,6,75),
+        glm::vec3(-10,6,60),
+        glm::vec3(0,6,50),
+        glm::vec3(25,6,60),
+        glm::vec3(40,6,75),
+        glm::vec3(25,6,90),
+
+         glm::vec3(0,3,100),
+        glm::vec3(-10,3,90),
+        glm::vec3(-30,3,75),
+        glm::vec3(-10,3,60),
+        glm::vec3(0,3,50),
+        glm::vec3(25,3,60),
+        glm::vec3(40,3,75),
+        glm::vec3(25,3,90),
+
+         glm::vec3(0,1,100),
+        glm::vec3(-10,1,90),
+        glm::vec3(-30,1,75),
+        glm::vec3(-10,1,60),
+        glm::vec3(0,1,50),
+        glm::vec3(25,1,60),
+        glm::vec3(40,1,75),
+        glm::vec3(25,1,90),
+
+          glm::vec3(0,12,100),
+        glm::vec3(-10,12,90),
+        glm::vec3(-30,12,75),
+        glm::vec3(-10,12,60),
+        glm::vec3(0,12,50),
+        glm::vec3(25,12,60),
+        glm::vec3(40,12,75),
+        glm::vec3(25,12,90),
+
+          glm::vec3(0,14,100),
+        glm::vec3(-10,14,90),
+        glm::vec3(-30,14,75),
+        glm::vec3(-10,14,60),
+        glm::vec3(0,14,50),
+        glm::vec3(25,14,60),
+        glm::vec3(40,14,75),
+        glm::vec3(25,14,90),
+    };
+
+    for (int i = 0; i < 8; i ++){
+        m_controlPointsButterflyPath.push_back(all[rand()% 49]);
+    }
+}
 
 // Determine lengths along the control points, which is the set of control points forming the closed curve
 void CCatmullRom::ComputeLengthsAlongControlPoints()
@@ -78,7 +149,22 @@ void CCatmullRom::ComputeLengthsAlongControlPoints()
     m_distances.push_back(fAccumulatedLength);
 }
 
+void CCatmullRom::ComputeLengthsAlongControlPointsButterflyPath(){
 
+    int M = (int)m_controlPointsButterflyPath.size();
+
+    float fAccumulatedLength = 0.0f;
+    m_distancesButterflyPath.push_back(fAccumulatedLength);
+    for (int i = 1; i < M; i++) {
+        fAccumulatedLength += glm::distance(m_controlPointsButterflyPath[i - 1], m_controlPointsButterflyPath[i]);
+        m_distancesButterflyPath.push_back(fAccumulatedLength);
+    }
+
+    // Get the distance from the last point to the first
+    fAccumulatedLength += glm::distance(m_controlPointsButterflyPath[M - 1], m_controlPointsButterflyPath[0]);
+    m_distancesButterflyPath.push_back(fAccumulatedLength);
+
+}
 // Return the point (and upvector, if control upvectors provided) based on a distance d along the control polygon
 bool CCatmullRom::Sample(float d, glm::vec3 &p, glm::vec3 &up)
 {
@@ -126,6 +212,50 @@ bool CCatmullRom::Sample(float d, glm::vec3 &p, glm::vec3 &up)
     return true;
 }
 
+bool CCatmullRom::SampleButterflyPath(float d, glm::vec3 &p, glm::vec3 &up){
+     if (d < 0)
+        return false;
+
+    int M = (int)m_controlPointsButterflyPath.size();
+    if (M == 0)
+        return false;
+
+
+    float fTotalLength = m_distancesButterflyPath[m_distancesButterflyPath.size() - 1];
+
+    // The the current length along the control polygon; handle the case where we've looped around the track
+    float fLength = d - (int)(d / fTotalLength) * fTotalLength;
+
+    // Find the current segment
+    int j = -1;
+    for (int i = 0; i < (int)m_distancesButterflyPath.size(); i++) {
+        if (fLength >= m_distancesButterflyPath[i] && fLength < m_distancesButterflyPath[i + 1]) {
+            j = i; // found it!
+            break;
+        }
+    }
+
+    if (j == -1)
+        return false;
+
+    // Interpolate on current segment -- get t
+    float fSegmentLength = m_distancesButterflyPath[j + 1] - m_distancesButterflyPath[j];
+    float t = (fLength - m_distancesButterflyPath[j]) / fSegmentLength;
+
+    // Get the indices of the four points along the control polygon for the current segment
+    int iPrev = ((j - 1) + M) % M;
+    int iCur = j;
+    int iNext = (j + 1) % M;
+    int iNextNext = (j + 2) % M;
+
+    // Interpolate to get the point (and upvector)
+    p = Interpolate(m_controlPointsButterflyPath[iPrev], m_controlPointsButterflyPath[iCur], m_controlPointsButterflyPath[iNext], m_controlPointsButterflyPath[iNextNext], t);
+    if (m_controlUpVectorsButterflyPath.size() == m_controlPointsButterflyPath.size())
+        up = glm::normalize(Interpolate(m_controlUpVectorsButterflyPath[iPrev], m_controlUpVectorsButterflyPath[iCur], m_controlUpVectorsButterflyPath[iNext], m_controlUpVectorsButterflyPath[iNextNext], t));
+
+
+    return true;
+}
 
 
 // Sample a set of control points using an open Catmull-Rom spline, to produce a set of iNumSamples that are (roughly) equally spaced
@@ -169,6 +299,79 @@ void CCatmullRom::UniformlySampleControlPoints(int numSamples)
 
 }
 
+void CCatmullRom::UniformlySampleControlPointsButterflyPath(int numSamples)
+{
+    glm::vec3 p, up;
+
+    // Compute the lengths of each segment along the control polygon, and the total length
+    ComputeLengthsAlongControlPointsButterflyPath();
+    float fTotalLength = m_distancesButterflyPath[m_distancesButterflyPath.size() - 1];
+
+    // The spacing will be based on the control polygon
+    float fSpacing = fTotalLength / numSamples;
+
+    // Call PointAt to sample the spline, to generate the points
+    for (int i = 0; i < numSamples; i++) {
+        SampleButterflyPath(i * fSpacing, p, up);
+        m_centrelinePointsButterflyPath.push_back(p);
+        if (m_controlUpVectorsButterflyPath.size() > 0)
+            m_centrelineUpVectorsButterflyPath.push_back(up);
+
+    }
+
+
+    // Repeat once more for truly equidistant points
+    m_controlPointsButterflyPath = m_centrelinePointsButterflyPath;
+    m_controlUpVectorsButterflyPath = m_centrelineUpVectorsButterflyPath;
+    m_centrelinePointsButterflyPath.clear();
+    m_centrelineUpVectorsButterflyPath.clear();
+    m_distancesButterflyPath.clear();
+    ComputeLengthsAlongControlPointsButterflyPath();
+    fTotalLength = m_distancesButterflyPath[m_distancesButterflyPath.size() - 1];
+    fSpacing = fTotalLength / numSamples;
+    for (int i = 0; i < numSamples; i++) {
+        SampleButterflyPath(i * fSpacing, p, up);
+        m_centrelinePointsButterflyPath.push_back(p);
+        if (m_controlUpVectorsButterflyPath.size() > 0)
+            m_centrelineUpVectorsButterflyPath.push_back(up);
+    }
+
+
+}
+
+void CCatmullRom::CreateLineButterflyPath(){
+
+    SetControlPointsButterflyPath();
+    UniformlySampleControlPointsButterflyPath(num_samples_curve_butterfly);
+
+    // Create a VAO called m_vaoCentreline and a VBO to get the points onto the graphics card
+    glGenVertexArrays(1, &m_vaoCentrelineButterflyPath);
+    glBindVertexArray(m_vaoCentrelineButterflyPath);
+    CVertexBufferObject vbo;
+    vbo.Create();
+    vbo.Bind();
+    glm::vec2 texCoord(0.0f, 0.0f);
+    glm::vec3 normal(0.0f, 1.0f, 0.0f);
+    for (unsigned int i = 0; i < num_samples_curve_butterfly; i++)
+    {
+        vbo.AddData(&m_centrelinePointsButterflyPath[i], sizeof(glm::vec3));
+        vbo.AddData(&texCoord, sizeof(glm::vec2));
+        vbo.AddData(&normal, sizeof(glm::vec3));
+    }
+    vbo.UploadDataToGPU(GL_STATIC_DRAW);
+    GLsizei stride = 2 * sizeof(glm::vec3) + sizeof(glm::vec2);
+    // Vertex positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
+    // Texture coordinates
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)sizeof(glm::vec3));
+    // Normal vectors
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(glm::vec3)
+        + sizeof(glm::vec2)));
+
+}
 
 
 void CCatmullRom::CreateCentreline()
@@ -510,6 +713,16 @@ void CCatmullRom::RenderCentreline()
     glDrawArrays(GL_POINTS, 0, num_samples_curve);
     glPointSize(3.0f);
     glDrawArrays(GL_LINE_LOOP, 0, num_samples_curve);
+    glLineWidth(10.0f);
+}
+
+void CCatmullRom::RenderLineButterflyPath()
+{
+    // Bind the VAO m_vaoCentreline and render it
+    glBindVertexArray(m_vaoCentrelineButterflyPath);
+    glDrawArrays(GL_POINTS, 0, num_samples_curve_butterfly);
+    glPointSize(3.0f);
+    glDrawArrays(GL_LINE_LOOP, 0, num_samples_curve_butterfly);
     glLineWidth(10.0f);
 }
 

@@ -28,11 +28,12 @@ void Tetrahedron::Create() {
 	glm::vec2 texCoord4(1.0f, 1.0f);
 
 	glm::vec3 normal(0.0f, 1.0f, 0.0f);
-	glm::vec3 normal2(0.0f, -1.0f, 0.0f);
-	glm::vec3 normal3(0.0f, 0.0f, -1.0f);
-	glm::vec3 normal4(0.0f, 0.0f, 1.0f);
-	glm::vec3 normal5(1.0f, 0.0f, 0.0f);
-	glm::vec3 normal6(-1.0f, 0.0f, 0.0f);
+	//::vec3 normal2(0.0f, -1.0f, 0.0f);
+	glm::vec3 normal2(glm::cross(glm::vec3(1, -1, 1) -glm::vec3(1, -1, -1)  ,  glm::vec3(-1, -1, -1) - glm::vec3(1, -1, -1)));
+	glm::vec3 normal3(glm::cross(glm::vec3(-1, -1, -1) - glm::vec3(1, -1, -1) , glm::vec3(0, 1, 0) - glm::vec3(1, -1, -1) ));
+	glm::vec3 normal4( glm::cross(glm::vec3(-1, -1, 1) - glm::vec3(1, -1, 1 ), glm::vec3(0, 1, 0) - glm::vec3(-1, -1, 1) ) );
+	glm::vec3 normal5(glm::cross(glm::vec3(1,-1,-1) - glm::vec3(1,-1,1), glm::vec3(0, 1, 0) - glm::vec3(1, -1, 1) ));
+	glm::vec3 normal6(glm::cross(glm::vec3(-1, -1, 1) - glm::vec3(-1, -1, -1) , glm::vec3(0, 1, 0) - glm::vec3(-1, -1, -1) ));
 
 	{
 		//front face

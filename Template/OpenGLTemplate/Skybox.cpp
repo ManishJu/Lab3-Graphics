@@ -13,11 +13,23 @@ CSkybox::~CSkybox()
 // Create a skybox of a given size with six textures
 void CSkybox::Create(float size)
 {
-
-	m_cubemapTexture.Create("resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_rt.jpg", "resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_lf.jpg",
+/*m_cubemapTexture.Create("resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_rt.jpg", "resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_lf.jpg",
 		"resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_up.jpg", "resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_dn.jpg",
 		"resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_bk.jpg", "resources\\skyboxes\\jajdarkland1\\flipped\\jajdarkland1_ft.jpg");
+*/
+	/*m_cubemapTexture.Create("resources\\skyboxes\\sky2\\oright7.jpg", "resources\\skyboxes\\sky2\\oleft7.jpg",
+		"resources\\skyboxes\\sky2\\otop7.jpg", "resources\\skyboxes\\sky2\\otop7.jpg",
+		"resources\\skyboxes\\sky2\\oback7.jpg", "resources\\skyboxes\\sky2\\ofront7.jpg");*/
 
+/*	m_cubemapTexture.Create("resources\\skyboxes\\hdri_morning\\3.jpg", "resources\\skyboxes\\hdri_morning\\1.jpg",
+		"resources\\skyboxes\\hdri_morning\\5.jpg", "resources\\skyboxes\\hdri_morning\\6.jpg",
+		"resources\\skyboxes\\hdri_morning\\4.jpg", "resources\\skyboxes\\hdri_morning\\2.jpg");
+	*/
+	m_cubemapTexture.Create("resources\\skyboxes\\hdri_evening\\3.jpg", "resources\\skyboxes\\hdri_evening\\1.jpg",
+		"resources\\skyboxes\\hdri_evening\\5.jpg", "resources\\skyboxes\\hdri_evening\\6.jpg",
+		"resources\\skyboxes\\hdri_evening\\4.jpg", "resources\\skyboxes\\hdri_evening\\2.jpg");
+	
+	
 	
 	
 	glGenVertexArrays(1, &m_vao);

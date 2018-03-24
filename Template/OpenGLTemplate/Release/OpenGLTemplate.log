@@ -1,16 +1,1 @@
-﻿  Game.cpp
-Game.cpp(313): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-Game.cpp(321): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-Game.cpp(438): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
-Game.cpp(452): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
-Game.cpp(665): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-Game.cpp(688): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-Game.cpp(919): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
-Game.cpp(922): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-  Generating code
-  1 of 1370 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
-  Finished generating code
-  OpenGLTemplate.vcxproj -> D:\All other git repos\Lab CG\Lab3-Graphics\Template\Release\OpenGLTemplate.exe
-  OpenGLTemplate.vcxproj -> D:\All other git repos\Lab CG\Lab3-Graphics\Template\Release\OpenGLTemplate.pdb (Full PDB)
+﻿
