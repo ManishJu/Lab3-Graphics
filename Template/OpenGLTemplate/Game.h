@@ -67,6 +67,7 @@ private:
 	bool m_appActive;
 	bool turnOnSpotLights;
 	bool turnOnFreeRoamMode;
+	bool turnOnToonShading;
 
 	int m_framesPerSecond;
 	unsigned int m_pPointsCollected;

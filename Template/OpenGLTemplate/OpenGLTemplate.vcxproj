@@ -98,10 +98,10 @@
     <ClCompile Include="HighResolutionTimer.cpp" />
     <ClCompile Include="MatrixStack.cpp" />
     <ClCompile Include="OpenAssetImportMesh.cpp" />
+    <ClCompile Include="OpenAssetImportMeshInst.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Shaders.cpp" />
     <ClCompile Include="Skybox.cpp" />
-    <ClCompile Include="Source.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Tetrahedron.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -121,6 +121,7 @@
     <ClInclude Include="HighResolutionTimer.h" />
     <ClInclude Include="MatrixStack.h" />
     <ClInclude Include="OpenAssetImportMesh.h" />
+    <ClInclude Include="OpenAssetImportMeshInst.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="Shaders.h" />
     <ClInclude Include="Skybox.h" />
@@ -133,6 +134,8 @@
   <ItemGroup>
     <None Include="resources\shaders\mainShader.frag" />
     <None Include="resources\shaders\mainShader.vert" />
+    <None Include="resources\shaders\sphereShader.frag" />
+    <None Include="resources\shaders\sphereShader.vert" />
     <None Include="resources\shaders\textShader.frag" />
     <None Include="resources\shaders\textShader.vert" />
   </ItemGroup>

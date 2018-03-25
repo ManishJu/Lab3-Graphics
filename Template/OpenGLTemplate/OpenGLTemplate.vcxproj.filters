@@ -52,9 +52,9 @@
     <ClCompile Include="CatmullRom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="Tetrahedron.cpp" />
+    <ClCompile Include="OpenAssetImportMeshInst.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -113,6 +113,7 @@
     </ClInclude>
     <ClInclude Include="Cube.h" />
     <ClInclude Include="Tetrahedron.h" />
+    <ClInclude Include="OpenAssetImportMeshInst.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -142,6 +143,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="resources\shaders\mainShader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="resources\shaders\sphereShader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="resources\shaders\sphereShader.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

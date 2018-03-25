@@ -235,23 +235,14 @@ void Game::Initialise()
 	m_pShaderPrograms->push_back(pFontProgram);
 
 	// Create the sphere shader program
-	CShaderProgram *pSphereProgram = new CShaderProgram;
-	pSphereProgram->CreateProgram();
-	pSphereProgram->AddShaderToProgram(&shShaders[4]);
-	pSphereProgram->AddShaderToProgram(&shShaders[5]);
-	pSphereProgram->LinkProgram();
-	pSphereProgram->SetUniform("bUseTexture", true);
-	pSphereProgram->SetUniform("sampler0", 0);
-	//Set light and materials in sphere programme
-	pSphereProgram->SetUniform("material1.Ma", glm::vec3(0.0f, 1.0f, 0.0f));
-	pSphereProgram->SetUniform("material1.Md", glm::vec3(0.0f, 1.0f, 0.0f));
-	pSphereProgram->SetUniform("material1.Ms", glm::vec3(1.0f, 1.0f, 1.0f));
-	pSphereProgram->SetUniform("material1.shininess", 50.0f);
-	pSphereProgram->SetUniform("light1.La", glm::vec3(0.15f, 0.15f, 0.15f));
-	pSphereProgram->SetUniform("light1.Ld", glm::vec3(1.0f, 1.0f, 1.0f));
-	pSphereProgram->SetUniform("light1.Ls", glm::vec3(1.0f, 1.0f, 1.0f));
-	pSphereProgram->SetUniform("t", m_tt);
-	m_pShaderPrograms->push_back(pSphereProgram);
+	CShaderProgram *pBunnyShaderProgram = new CShaderProgram;
+	pBunnyShaderProgram->CreateProgram();
+	pBunnyShaderProgram->AddShaderToProgram(&shShaders[4]);
+	pBunnyShaderProgram->AddShaderToProgram(&shShaders[5]);
+	pBunnyShaderProgram->LinkProgram();
+	pBunnyShaderProgram->SetUniform("bUseTexture", true);
+	pBunnyShaderProgram->SetUniform("sampler0", 0);
+	m_pShaderPrograms->push_back(pBunnyShaderProgram);
 
 	// You can follow this pattern to load additional shaders
 
@@ -352,6 +343,8 @@ void Game::Initialise()
 	}
 
 	//m_pFtFont->LoadFont("resources\\fonts\\cambriab.ttf", 32);
+	m_pFtFont->LoadFont("resources\\fonts\\G.B.BOOT.ttf", 32);
+
 
 
 
@@ -408,6 +401,9 @@ void Game::Render()
 	pMainProgram->SetUniform("light2.direction", glm::normalize(viewNormalMatrix*glm::vec3(0, -1, 0)));
 	pMainProgram->SetUniform("light2.exponent", 25.0f);
 	pMainProgram->SetUniform("light2.cutoff", 30.0f);
+	pMainProgram->SetUniform("light2.constant", 0.0f);
+	pMainProgram->SetUniform("light2.linear", 0.1f);
+	pMainProgram->SetUniform("light2.quadratic", 0.33f);
 
 	glm::vec4 lightPosition3(10, 20, 0, 1); // Position of light source *in world coordinates
 	pMainProgram->SetUniform("light3.position", viewMatrix*glm::vec4(lightPos.x, lightPos.y + 10, lightPos.z, 1));
@@ -417,6 +413,9 @@ void Game::Render()
 	pMainProgram->SetUniform("light3.direction", glm::normalize(viewNormalMatrix*glm::vec3(0, -1, 0)));
 	pMainProgram->SetUniform("light3.exponent", 20.0f);
 	pMainProgram->SetUniform("light3.cutoff", 35.0f);
+	pMainProgram->SetUniform("light3.constant", 1.0f);
+	pMainProgram->SetUniform("light3.linear", 0.1f);
+	pMainProgram->SetUniform("light3.quadratic", 0.33f);
 
 	pMainProgram->SetUniform("material1.Ma", glm::vec3(1.0f));	// Ambient material reflectance
 	pMainProgram->SetUniform("material1.Md", glm::vec3(1.0f));	// Diffuse material reflectance
@@ -424,6 +423,7 @@ void Game::Render()
 	pMainProgram->SetUniform("material1.shininess", 15.0f);		// Shininess material property
 	pMainProgram->SetUniform("spotLightsOn", turnOnSpotLights); // turning off the main light and turning on the spotlights
 
+	pMainProgram->SetUniform("turnOnToonShading", turnOnToonShading);
 
 																// Render the skybox and terrain with full ambient reflectance 
 	modelViewMatrixStack.Push();
@@ -549,32 +549,32 @@ void Game::Render()
 
 
 
-		//// Render the big  tree
-		//{
-		//	modelViewMatrixStack.Push();
-		//	modelViewMatrixStack.Translate(glm::vec3(0.0f - 50.0f, 2.0f, 0.0f - 10.0f));
-		//	modelViewMatrixStack.Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
-		//	modelViewMatrixStack.Scale(100.0f);
-		//	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-		//	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		//	glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//	m_pTree1->Render();
-		//	modelViewMatrixStack.Pop();
-		//}
+		// Render the big  tree
+		{
+			modelViewMatrixStack.Push();
+			modelViewMatrixStack.Translate(glm::vec3(0.0f - 50.0f, 2.0f, 0.0f - 10.0f));
+			modelViewMatrixStack.Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
+			modelViewMatrixStack.Scale(100.0f);
+			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+			glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			m_pTree1->Render();
+			modelViewMatrixStack.Pop();
+		}
 
 
-		//// Render the second big tree
-		//{
-		//	modelViewMatrixStack.Push();
-		//	modelViewMatrixStack.Translate(glm::vec3(+180.0f, 2.0f, -40.0f));
-		//	modelViewMatrixStack.Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
-		//	modelViewMatrixStack.Scale(100.0f);
-		//	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-		//	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		//	glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//	m_pTree1->Render();
-		//	modelViewMatrixStack.Pop();
-		//}
+		// Render the second big tree
+		{
+			modelViewMatrixStack.Push();
+			modelViewMatrixStack.Translate(glm::vec3(+180.0f, 2.0f, -40.0f));
+			modelViewMatrixStack.Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
+			modelViewMatrixStack.Scale(100.0f);
+			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+			glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			m_pTree1->Render();
+			modelViewMatrixStack.Pop();
+		}
 
 
 		// Render the butterflies
@@ -661,20 +661,20 @@ void Game::Render()
 
 
 	// Switch to the sphere program
-	CShaderProgram *pSphereProgram = (*m_pShaderPrograms)[2];
-	pSphereProgram->UseProgram();
-	pSphereProgram->SetUniform("light1.position", viewMatrix*lightPosition1);
-	pSphereProgram->SetUniform("matrices.projMatrix", m_pCamera->GetPerspectiveProjectionMatrix());
+	CShaderProgram *pBunnyShaderProgram = (*m_pShaderPrograms)[2];
+	pBunnyShaderProgram->UseProgram();
+	pBunnyShaderProgram->SetUniform("light1.position", viewMatrix*lightPosition1);
+	pBunnyShaderProgram->SetUniform("matrices.projMatrix", m_pCamera->GetPerspectiveProjectionMatrix());
 
-	pSphereProgram->SetUniform("light1.position", viewMatrix*lightPosition1); // Position of light source *in eye coordinates*
-	pSphereProgram->SetUniform("light1.La", glm::vec3(1.0f));		// Ambient colour of light
-	pSphereProgram->SetUniform("light1.Ld", glm::vec3(1.0f));		// Diffuse colour of light
-	pSphereProgram->SetUniform("light1.Ls", glm::vec3(1.0f));		// Specular colour of light
-	pSphereProgram->SetUniform("material1.Ma", glm::vec3(1.0f));	// Ambient material reflectance
-	pSphereProgram->SetUniform("material1.Md", glm::vec3(0.0f));	// Diffuse material reflectance
-	pSphereProgram->SetUniform("material1.Ms", glm::vec3(0.0f));	// Specular material reflectance
-	pSphereProgram->SetUniform("material1.shininess", 15.0f);		// Shininess material property
-	pSphereProgram->SetUniform("t", m_tt);
+	pBunnyShaderProgram->SetUniform("light1.position", viewMatrix*lightPosition1); // Position of light source *in eye coordinates*
+	pBunnyShaderProgram->SetUniform("light1.La", glm::vec3(1.0f));		// Ambient colour of light
+	pBunnyShaderProgram->SetUniform("light1.Ld", glm::vec3(1.0f));		// Diffuse colour of light
+	pBunnyShaderProgram->SetUniform("light1.Ls", glm::vec3(1.0f));		// Specular colour of light
+	pBunnyShaderProgram->SetUniform("material1.Ma", glm::vec3(1.0f));	// Ambient material reflectance
+	pBunnyShaderProgram->SetUniform("material1.Md", glm::vec3(0.0f));	// Diffuse material reflectance
+	pBunnyShaderProgram->SetUniform("material1.Ms", glm::vec3(0.0f));	// Specular material reflectance
+	pBunnyShaderProgram->SetUniform("material1.shininess", 15.0f);		// Shininess material property
+	pBunnyShaderProgram->SetUniform("t", m_tt);
 
 	// Render the Rabbit
 	modelViewMatrixStack.Push();
@@ -682,12 +682,12 @@ void Game::Render()
 	modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 90.0f);
 	modelViewMatrixStack.Scale(5.0f);
 	modelViewMatrixStack *= m_pPlayerOrientation;
-	pSphereProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-	pSphereProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	pBunnyShaderProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	pBunnyShaderProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 	m_pRabbit->Render();
 	modelViewMatrixStack.Pop();
 
-	//Render
+	//Render 2.5D UI showing Laps completed
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
 	glm::vec4 vp(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -703,8 +703,10 @@ void Game::Render()
 		fontProgram->SetUniform("matrices.projMatrix",
 			m_pCamera->GetOrthographicProjectionMatrix());
 		fontProgram->SetUniform("vColour", glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
-		m_pFtFont->Render(p.x, p.y+10.0f, 25.0f, "Laps completed: ");
-		m_pFtFont->Render(p.x + 170.0f, p.y + 10.0f, 25.0f, (char *)((to_string(m_pLapsCompleted)).c_str()));
+		if (turnOnFreeRoamMode == false) {
+			m_pFtFont->Render(p.x, p.y + 10.0f, 25.0f, "Laps completed: ");
+			m_pFtFont->Render(p.x + 170.0f, p.y + 10.0f, 25.0f, (char *)((to_string(m_pLapsCompleted)).c_str()));
+		}
 	}
 
 
@@ -842,14 +844,13 @@ void Game::DisplayFrameRate()
 		fontProgram->SetUniform("vColour", glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
 		fontProgram->SetUniform("matrices.modelViewMatrix", glm::mat4(1));
 		fontProgram->SetUniform("matrices.projMatrix", m_pCamera->GetOrthographicProjectionMatrix());
-		fontProgram->SetUniform("vColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		if (!turnOnThirdPersonMode) m_pFtFont->Render(width - 200, height - 20, 20, "Laps Completed: %d", m_pLapsCompleted);
+		//fontProgram->SetUniform("vColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		if (turnOnThirdPersonMode == false) m_pFtFont->Render(width - 200, height - 20, 20, "Laps Completed: %d", m_pLapsCompleted);
 		m_pFtFont->Render(20, 20, 20, "Points Collected %d", m_pPointsCollected);
-
-		m_pFtFont->Render(20, height - 20, 20, "FPS: %d", m_framesPerSecond);
-		m_pFtFont->Render(20, height - 60, 20, "View direction %f ,%f, %f", (*m_pCameraViewDir).x, (*m_pCameraViewDir).y, (*m_pCameraViewDir).z);
+		//m_pFtFont->Render(20, height - 20, 20, "FPS: %d", m_framesPerSecond);
+		//m_pFtFont->Render(20, height - 60, 20, "View direction %f ,%f, %f", (*m_pCameraViewDir).x, (*m_pCameraViewDir).y, (*m_pCameraViewDir).z);
 		//m_pFtFont->Render(20, height - 80, 20, "View direction %f ,%f, %f", m_pCamera->GetView().x, m_pCamera->GetView().y, m_pCamera->GetView().z);
-		m_pFtFont->Render(20, height - 80, 20, "Position %f ,%f, %f", m_pCamera->GetPosition().x, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z);
+		//m_pFtFont->Render(20, height - 80, 20, "Position %f ,%f, %f", m_pCamera->GetPosition().x, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z);
 
 
 	}
@@ -997,7 +998,12 @@ LRESULT Game::ProcessEvents(HWND window, UINT message, WPARAM w_param, LPARAM l_
 			turnOnFreeRoamMode = false;
 			break;
 		case 'Z':
+			turnOnToonShading = false;
 			turnOnSpotLights = !turnOnSpotLights;
+			break;
+		case 'Y':
+			turnOnToonShading = !turnOnToonShading;
+			turnOnSpotLights = false;
 			break;
 		case 'O':
 			m_pCameraViewDir = &T;
@@ -1011,6 +1017,7 @@ LRESULT Game::ProcessEvents(HWND window, UINT message, WPARAM w_param, LPARAM l_
 			m_pCamera->SetOrthographicProjectionMatrix(width, height);
 			m_pCamera->SetPerspectiveProjectionMatrix(45.0f, (float)width / (float)height, 0.5f, 5000.0f);
 			break;
+	
 
 
 

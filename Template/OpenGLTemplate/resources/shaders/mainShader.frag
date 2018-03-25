@@ -13,6 +13,7 @@ uniform samplerCube CubeMapTex;
 uniform bool bUseTexture;    // A flag indicating if texture-mapping should be applied
 uniform bool renderSkybox;
 uniform bool spotLightsOn;
+uniform bool turnOnToonShading;
 
 
 
@@ -27,6 +28,9 @@ struct LightInfo
 	vec3 direction;
 	float exponent;
 	float cutoff;
+	float constant;
+	float linear;
+	float quadratic;
 };
 
 // Structure holding material information:  its ambient, diffuse, and specular colours, and shininess
@@ -70,6 +74,10 @@ vec3 BlinnPhongModel(vec4 eyePosition, vec3 eyeNorm)
 
 vec3 BlinnPhongSpotlightModel(LightInfo light, vec4 p, vec3 n)
 {
+	//float distance = length(light.position - p);
+	//float attenuation = 1.0 / (light.constant + light.linear * distance +
+		//light.quadratic * (distance * distance));
+
 	vec3 s = normalize(vec3(light.position - p));
 	float angle = acos(dot(-s, light.direction));
 	float cutoff = radians(clamp(light.cutoff, 0.0, 90.0));
@@ -84,7 +92,7 @@ vec3 BlinnPhongSpotlightModel(LightInfo light, vec4 p, vec3 n)
 		ambient = light.La * material1.Ma;
 		if (sDotN > 0.0)
 			specular = light.Ls * material1.Ms * pow(max(dot(h, n), 0.0), material1.shininess);
-		return ambient + spotFactor * (diffuse + specular);
+		return ambient + spotFactor *(diffuse + specular);
 	}
 	else
 		return ambient;
@@ -92,6 +100,7 @@ vec3 BlinnPhongSpotlightModel(LightInfo light, vec4 p, vec3 n)
 
 void main()
 {
+	
 	vec3 vColour;
 	 vColour = BlinnPhongModel(vEyePosition,normalize(vEyeNorm));
 	if(spotLightsOn)  vColour = BlinnPhongSpotlightModel(light2, vEyePosition, normalize(vEyeNorm)) + BlinnPhongSpotlightModel(light3, vEyePosition, normalize(vEyeNorm));
@@ -103,9 +112,9 @@ void main()
 
 		// Get the texel colour from the texture sampler
 		vec4 vTexColour = texture(sampler0, vTexCoord);	
-
+		if(turnOnToonShading)  vColour = floor(vColour * 2) / 2;
 		if (bUseTexture)
-			vOutputColour = vTexColour*vec4(floor(vColour * 2) / 2, 1.0f);	// Combine object colour and texture 
+			vOutputColour = vTexColour*vec4(vColour, 1.0f);	// Combine object colour and texture 
 			//vOutputColour = vec4(vColour, 1.0f);	// Combine object colour and texture 
 
 		else
