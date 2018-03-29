@@ -68,6 +68,8 @@ private:
 	bool turnOnSpotLights;
 	bool turnOnFreeRoamMode;
 	bool turnOnToonShading;
+	bool resetCam;
+	bool turnFogOn;
 
 	int m_framesPerSecond;
 	unsigned int m_pPointsCollected;
@@ -88,6 +90,7 @@ private:
 	glm::vec3 *m_pCameraUpVector = &B;
 	glm::vec3 m_pPlayerPos;
 	glm::mat4 m_pPlayerOrientation;
+	glm::vec3 m_pGrassPositions[1000];
 	glm::vec3 m_pButterflyPos[10];
 	glm::mat4 m_pButterflyOrientation[10];
 

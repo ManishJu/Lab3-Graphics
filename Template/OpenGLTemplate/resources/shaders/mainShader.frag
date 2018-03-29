@@ -14,6 +14,8 @@ uniform bool bUseTexture;    // A flag indicating if texture-mapping should be a
 uniform bool renderSkybox;
 uniform bool spotLightsOn;
 uniform bool turnOnToonShading;
+uniform bool turnFogOn;
+uniform vec3 m_pGrassPositions[1000];
 
 
 
@@ -100,7 +102,7 @@ vec3 BlinnPhongSpotlightModel(LightInfo light, vec4 p, vec3 n)
 
 void main()
 {
-	
+	float w = exp(-0.01*length(vEyePosition.xyz));
 	vec3 vColour;
 	 vColour = BlinnPhongModel(vEyePosition,normalize(vEyeNorm));
 	if(spotLightsOn)  vColour = BlinnPhongSpotlightModel(light2, vEyePosition, normalize(vEyeNorm)) + BlinnPhongSpotlightModel(light3, vEyePosition, normalize(vEyeNorm));
@@ -112,14 +114,16 @@ void main()
 
 		// Get the texel colour from the texture sampler
 		vec4 vTexColour = texture(sampler0, vTexCoord);	
-		if(turnOnToonShading)  vColour = floor(vColour * 2) / 2;
+	
+		if(turnOnToonShading)  vColour = ((dot(normalize(-vEyePosition.xyz),normalize(vEyeNorm))) < 0.4 ? 0 : 1 )*floor(vColour * 2) / 2;
 		if (bUseTexture)
 			vOutputColour = vTexColour*vec4(vColour, 1.0f);	// Combine object colour and texture 
 			//vOutputColour = vec4(vColour, 1.0f);	// Combine object colour and texture 
 
-		else
+		else 
 			vOutputColour = vec4(vColour, 1.0f);	// Just use the colour instead
 
+		if (turnFogOn) vOutputColour.xyz = w * vOutputColour.xyz + (1 - w)* vec3(0.5, 0.5, 0.5);
 		//vOutputColour = floor(vOutputColour * 10)/10;
 	}
 	

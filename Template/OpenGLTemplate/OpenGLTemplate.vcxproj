@@ -132,10 +132,12 @@
     <ClInclude Include="VertexBufferObjectIndexed.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\shaders\butterflyShader.frag" />
+    <None Include="resources\shaders\butterflyShader.vert" />
     <None Include="resources\shaders\mainShader.frag" />
     <None Include="resources\shaders\mainShader.vert" />
-    <None Include="resources\shaders\sphereShader.frag" />
-    <None Include="resources\shaders\sphereShader.vert" />
+    <None Include="resources\shaders\bunnyShader.frag" />
+    <None Include="resources\shaders\bunnyShader.vert" />
     <None Include="resources\shaders\textShader.frag" />
     <None Include="resources\shaders\textShader.vert" />
   </ItemGroup>

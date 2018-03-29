@@ -130,7 +130,9 @@ Game::~Game()
 void Game::Initialise()
 {
 
-
+	for (int i = 0; i < 1000; i++) {
+		m_pGrassPositions[i] = glm::vec3(rand() % 150 - 45, 0, (rand() % 450) - 450);
+	}
 
 	for (int i = 0; i < 100; i++) {
 		plantPos.push_back(glm::vec3(rand() % 150 - 45, 0, (rand() % 450) - 450));
@@ -144,6 +146,8 @@ void Game::Initialise()
 		plantPos2.push_back(glm::vec4((rand() % 85) + 125, 0, -180 - (rand() % 320), rand() % 8));
 
 	}
+
+	
 
 	// Set the clear colour and depth
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -200,8 +204,10 @@ void Game::Initialise()
 	sShaderFileNames.push_back("mainShader.frag");
 	sShaderFileNames.push_back("textShader.vert");
 	sShaderFileNames.push_back("textShader.frag");
-	sShaderFileNames.push_back("sphereShader.vert");
-	sShaderFileNames.push_back("sphereShader.frag");
+	sShaderFileNames.push_back("bunnyShader.vert");
+	sShaderFileNames.push_back("bunnyShader.frag");
+	sShaderFileNames.push_back("butterflyShader.vert");
+	sShaderFileNames.push_back("butterflyShader.frag");
 
 	for (int i = 0; i < (int)sShaderFileNames.size(); i++) {
 		string sExt = sShaderFileNames[i].substr((int)sShaderFileNames[i].size() - 4, 4);
@@ -234,7 +240,7 @@ void Game::Initialise()
 	pFontProgram->LinkProgram();
 	m_pShaderPrograms->push_back(pFontProgram);
 
-	// Create the sphere shader program
+	// Create the bunny shader program
 	CShaderProgram *pBunnyShaderProgram = new CShaderProgram;
 	pBunnyShaderProgram->CreateProgram();
 	pBunnyShaderProgram->AddShaderToProgram(&shShaders[4]);
@@ -243,6 +249,16 @@ void Game::Initialise()
 	pBunnyShaderProgram->SetUniform("bUseTexture", true);
 	pBunnyShaderProgram->SetUniform("sampler0", 0);
 	m_pShaderPrograms->push_back(pBunnyShaderProgram);
+
+	//Create the butterfly shader program
+	CShaderProgram *pButterflyShaderProgram = new CShaderProgram;
+	pButterflyShaderProgram->CreateProgram();
+	pButterflyShaderProgram->AddShaderToProgram(&shShaders[6]);
+	pButterflyShaderProgram->AddShaderToProgram(&shShaders[7]);
+	pButterflyShaderProgram->LinkProgram();
+	pButterflyShaderProgram->SetUniform("bUseTexture", true);
+	pButterflyShaderProgram->SetUniform("sampler0", 0);
+	m_pShaderPrograms->push_back(pButterflyShaderProgram);
 
 	// You can follow this pattern to load additional shaders
 
@@ -275,11 +291,10 @@ void Game::Initialise()
 		m_pPlants[6]->Load("resources\\models\\Plants\\seven.obj");
 		m_pPlants[7]->Load("resources\\models\\Plants\\eight.obj");
 		m_pPlants[8]->Load("resources\\models\\Plants\\nine.obj");
-		//m_pPlants[0]->Load("resources\\models\\rock\\Plants\\ten.obj");
 
 	}
 
-	//loading the 10 Collectibles (apples right now)
+	//loading the  Collectibles (apples right now)
 	for (int i = 0; i < 10; i++) {
 		m_pCollectible[i]->Load("resources\\models\\Apple\\apple.obj");
 	}
@@ -308,17 +323,14 @@ void Game::Initialise()
 	m_pAudio->LoadMusicStream("Resources\\Audio\\On Horse Day - Zelda Breath of the Wild Soundtrack.mp3");	// Royalty free music from http://www.nosoapradio.us/
 	m_pAudio->PlayMusicStream();
 
-	//m_pCamera->Set(glm::vec3(0,300,0), glm::vec3(0,0,0), glm::vec3(1,0,0));
-	/* p0 = glm::vec3(-500, 10, -200);
-	p1 = glm::vec3(0, 10, -200);
-	p2 = glm::vec3(0, 10, 200);
-	p3 = glm::vec3(-500, 10, 200);*/
 
 	m_pPath->CreateCentreline();
 	m_pPath->CreateOffsetCurves();
 	m_pPath->CreateTrack();
 	m_pPath->CreateLeftSideFence();
 	m_pPath->CreateRightSideFence();
+
+	//Objects created with texture mapping
 	m_pCube->Create();
 	m_pTetrahedron->Create();
 
@@ -342,7 +354,6 @@ void Game::Initialise()
 		m_pObstaclesPos.push_back(point_to_add);
 	}
 
-	//m_pFtFont->LoadFont("resources\\fonts\\cambriab.ttf", 32);
 	m_pFtFont->LoadFont("resources\\fonts\\G.B.BOOT.ttf", 32);
 
 
@@ -422,8 +433,9 @@ void Game::Render()
 	pMainProgram->SetUniform("material1.Ms", glm::vec3(1.0f));	// Specular material reflectance
 	pMainProgram->SetUniform("material1.shininess", 15.0f);		// Shininess material property
 	pMainProgram->SetUniform("spotLightsOn", turnOnSpotLights); // turning off the main light and turning on the spotlights
-
 	pMainProgram->SetUniform("turnOnToonShading", turnOnToonShading);
+	pMainProgram->SetUniform("turnFogOn", turnFogOn);
+	pMainProgram->SetUniform("m_pGrassPositions", m_pGrassPositions);
 
 																// Render the skybox and terrain with full ambient reflectance 
 	modelViewMatrixStack.Push();
@@ -439,9 +451,11 @@ void Game::Render()
 
 	// Render the planar terrain
 	modelViewMatrixStack.Push();
+	pMainProgram->SetUniform("turnOnToonShading", false);
 	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 	m_pPlanarTerrain->Render();
+	pMainProgram->SetUniform("turnOnToonShading", turnOnToonShading);
 	modelViewMatrixStack.Pop();
 
 
@@ -535,6 +549,22 @@ void Game::Render()
 			modelViewMatrixStack.Pop();
 		}
 
+		// Render the butterflies
+		for (int i = 0; i < 10; i++)
+		{
+			modelViewMatrixStack.Push();
+			modelViewMatrixStack.Translate(glm::vec3(m_pButterflyPos[i]));
+			modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), -90.0f);
+			modelViewMatrixStack.Scale(.3f);
+			if (i == 4 || i == 9) modelViewMatrixStack.Scale(.03f);
+			modelViewMatrixStack *= m_pButterflyOrientation[i];
+			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+			m_pButterflies[i]->Render();
+
+			modelViewMatrixStack.Pop();
+		}
+
 		// Render the crate box (cube) 
 		{
 			modelViewMatrixStack.Push();
@@ -577,22 +607,6 @@ void Game::Render()
 		}
 
 
-		// Render the butterflies
-		for (int i = 0; i < 10; i++)
-		{
-			modelViewMatrixStack.Push();
-			modelViewMatrixStack.Translate(glm::vec3(m_pButterflyPos[i]));
-			modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), -90.0f);
-			modelViewMatrixStack.Scale(.3f);
-			if(i == 4 || i == 9) modelViewMatrixStack.Scale(.03f);
-			//else modelViewMatrixStack.Rotate(glm::vec3(0.0f, 0.0f, 1.0f), -90.0f);
-			modelViewMatrixStack *= m_pButterflyOrientation[i];
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			m_pButterflies[i]->Render();
-			modelViewMatrixStack.Pop();
-		}
-
 		/*// Render the barrel
 		{
 		modelViewMatrixStack.Push();
@@ -605,6 +619,7 @@ void Game::Render()
 		}*/
 
 		// Render the sphere
+
 		{
 			modelViewMatrixStack.Push();
 			modelViewMatrixStack.Translate(glm::vec3(0.0f, 2.0f, 150.0f));
@@ -617,9 +632,11 @@ void Game::Render()
 			modelViewMatrixStack.Pop();
 		}
 
+
 		// Render the track
 		{
 			modelViewMatrixStack.Push();
+			pMainProgram->SetUniform("turnOnToonShading", false);
 			pMainProgram->SetUniform("bUseTexture", true); // turn off texturing
 			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 			pMainProgram->SetUniform("matrices.normalMatrix",
@@ -630,6 +647,7 @@ void Game::Render()
 			m_pPath->RenderTrack();
 			m_pPath->RenderLeftSideFence();
 			m_pPath->RenderRightSideFence();
+			pMainProgram->SetUniform("turnOnToonShading", turnOnToonShading);
 			modelViewMatrixStack.Pop();
 		}
 
@@ -637,6 +655,7 @@ void Game::Render()
 	}
 
 	//Render Collectibles
+	
 	for (int i = 0; i < 10; i++) {
 		modelViewMatrixStack.Push();
 		modelViewMatrixStack.Translate(collectiblePos[i]);
@@ -648,6 +667,8 @@ void Game::Render()
 		modelViewMatrixStack.Pop();
 	}
 	//Render the Obstacles
+
+	pMainProgram->SetUniform("perlinModeOn", true);
 	for (int i = 0; i < 10; i++) {
 		modelViewMatrixStack.Push();
 		modelViewMatrixStack.Translate(m_pObstaclesPos[i]);
@@ -658,9 +679,10 @@ void Game::Render()
 		m_pObstacle[i]->Render();
 		modelViewMatrixStack.Pop();
 	}
+	pMainProgram->SetUniform("perlinModeOn", false);
 
 
-	// Switch to the sphere program
+	// Switch to the bunny shader program
 	CShaderProgram *pBunnyShaderProgram = (*m_pShaderPrograms)[2];
 	pBunnyShaderProgram->UseProgram();
 	pBunnyShaderProgram->SetUniform("light1.position", viewMatrix*lightPosition1);
@@ -750,12 +772,11 @@ void Game::Update()
 
 
 
-
 	//Updating the postion of the Camera
 	if (turnOnThirdPersonMode) {
 		p -= 20.0f*T;
 		p.y += 10.0f;
-
+		
 		*m_pCameraUpVector = glm::rotate(*m_pCameraUpVector, -20.0f, N);
 		*m_pCameraViewDir = glm::rotate(*m_pCameraViewDir, -20.0f, N);
 
@@ -764,7 +785,11 @@ void Game::Update()
 		p.y += 30.0f;
 		*m_pCameraViewDir = -*m_pCameraViewDir;
 	}
-	if (turnOnFreeRoamMode) m_pCamera->Update(m_dt);
+	if (turnOnFreeRoamMode) {
+		if (resetCam) m_pCamera->Set(glm::vec3(0.0f, 10.0f, 100.0f) , glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		resetCam = false;
+		m_pCamera->Update(m_dt);
+	}
 	else m_pCamera->Set(p, p + 2.0f*(*m_pCameraViewDir), *m_pCameraUpVector);
 
 
@@ -1005,11 +1030,15 @@ LRESULT Game::ProcessEvents(HWND window, UINT message, WPARAM w_param, LPARAM l_
 			turnOnToonShading = !turnOnToonShading;
 			turnOnSpotLights = false;
 			break;
+		case '2':
+			turnFogOn = !turnFogOn;
+			break;
 		case 'O':
 			m_pCameraViewDir = &T;
 			m_pCameraUpVector = &B;
 			turnOnThirdPersonMode = false;
 			turnOnTopView = false;
+			resetCam = true;
 			turnOnFreeRoamMode = true;
 			RECT dimensions = m_gameWindow.GetDimensions();
 			int width = dimensions.right - dimensions.left;
@@ -1017,6 +1046,7 @@ LRESULT Game::ProcessEvents(HWND window, UINT message, WPARAM w_param, LPARAM l_
 			m_pCamera->SetOrthographicProjectionMatrix(width, height);
 			m_pCamera->SetPerspectiveProjectionMatrix(45.0f, (float)width / (float)height, 0.5f, 5000.0f);
 			break;
+		
 	
 
 
