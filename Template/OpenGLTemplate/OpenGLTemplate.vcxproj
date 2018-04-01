@@ -130,6 +130,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="VertexBufferObject.h" />
     <ClInclude Include="VertexBufferObjectIndexed.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\butterflyShader.frag" />

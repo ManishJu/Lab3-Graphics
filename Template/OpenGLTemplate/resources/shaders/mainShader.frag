@@ -15,9 +15,6 @@ uniform bool renderSkybox;
 uniform bool spotLightsOn;
 uniform bool turnOnToonShading;
 uniform bool turnFogOn;
-uniform vec3 m_pGrassPositions[1000];
-
-
 
 
 // Structure holding light information:  its position as well as ambient, diffuse, and specular colours
@@ -115,7 +112,7 @@ void main()
 		// Get the texel colour from the texture sampler
 		vec4 vTexColour = texture(sampler0, vTexCoord);	
 	
-		if(turnOnToonShading)  vColour = ((dot(normalize(-vEyePosition.xyz),normalize(vEyeNorm))) < 0.4 ? 0 : 1 )*floor(vColour * 2) / 2;
+		if(turnOnToonShading)  vColour = ((dot(normalize(-vEyePosition.xyz),normalize(vEyeNorm))) < 0.2 ? 0 : 1 )*floor(vColour * 2) / 2;
 		if (bUseTexture)
 			vOutputColour = vTexColour*vec4(vColour, 1.0f);	// Combine object colour and texture 
 			//vOutputColour = vec4(vColour, 1.0f);	// Combine object colour and texture 
@@ -124,6 +121,8 @@ void main()
 			vOutputColour = vec4(vColour, 1.0f);	// Just use the colour instead
 
 		if (turnFogOn) vOutputColour.xyz = w * vOutputColour.xyz + (1 - w)* vec3(0.5, 0.5, 0.5);
+
+		
 		//vOutputColour = floor(vOutputColour * 10)/10;
 	}
 	

@@ -1,6 +1,8 @@
 #version 400 core
 
 uniform bool perlinModeOn;
+
+
 // Structure for matrices
 uniform struct Matrices
 {
@@ -69,5 +71,6 @@ void main()
 	
 	// Pass through the texture coordinate
 	vTexCoord = inCoord;
+
 } 
 	

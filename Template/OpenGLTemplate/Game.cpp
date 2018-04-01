@@ -34,6 +34,7 @@ Dr Greg Slabaugh (gregory.slabaugh.1@city.ac.uk)
 #include "Sphere.h"
 #include "MatrixStack.h"
 #include "OpenAssetImportMesh.h"
+#include "OpenAssetImportMeshInst.h"
 #include "Audio.h"
 #include "CatmullRom.h"
 #include "Cube.h"
@@ -60,7 +61,6 @@ Game::Game()
 	m_pRabbit = NULL;
 	m_pFlowersSet1 = NULL;
 	m_pFLowersSet2 = NULL;
-	m_pRock = NULL;
 
 
 	m_dt = 0.0f;
@@ -98,7 +98,7 @@ Game::~Game()
 	delete m_pRabbit;
 	delete m_pFlowersSet1;
 	delete m_pFLowersSet2;
-	delete m_pRock;
+
 	for (auto it = m_pPlants.begin(); it != m_pPlants.end(); ++it)	delete (*it);
 	m_pPlants.clear();
 
@@ -129,10 +129,6 @@ Game::~Game()
 // Initialisation:  This method only runs once at startup
 void Game::Initialise()
 {
-
-	for (int i = 0; i < 1000; i++) {
-		m_pGrassPositions[i] = glm::vec3(rand() % 150 - 45, 0, (rand() % 450) - 450);
-	}
 
 	for (int i = 0; i < 100; i++) {
 		plantPos.push_back(glm::vec3(rand() % 150 - 45, 0, (rand() % 450) - 450));
@@ -173,7 +169,6 @@ void Game::Initialise()
 	m_pRabbit = new COpenAssetImportMesh;
 	m_pFlowersSet1 = new COpenAssetImportMesh;
 	m_pFLowersSet2 = new COpenAssetImportMesh;
-	m_pRock = new COpenAssetImportMesh;
 
 	m_pPlants.reserve(10);
 	for (int i = 0; i < 10; ++i) m_pPlants.emplace_back(new COpenAssetImportMesh);
@@ -279,7 +274,6 @@ void Game::Initialise()
 	m_pApple->Load("resources\\models\\Apple\\apple.obj");
 	m_pRabbit->Load("resources\\models\\Rabbit\\rabbit.obj");
 	m_pFlowersSet1->Load("resources\\models\\Flowers\\Flowers1\\flowers.obj");
-	m_pRock->Load("resources\\models\\rock\\rock.obj");
 	//loading the 9 plant models in the vector
 	{
 		m_pPlants[0]->Load("resources\\models\\Plants\\one.obj");
@@ -312,7 +306,7 @@ void Game::Initialise()
 		m_pButterflies[i+3]->Load("resources\\models\\Butterflies\\butterfly4\\Pierisrapae.obj");
 		m_pButterflies[i+4]->Load("resources\\models\\Butterflies\\butterfly5\\model.obj");
 	}
-
+	
 	// Create a sphere
 	m_pSphere->Create("resources\\textures\\", "dirtpile01.jpg", 25, 25);  // Texture downloaded from http://www.psionicgames.com/?page_id=26 on 24 Jan 2013
 	glEnable(GL_CULL_FACE);
@@ -355,7 +349,7 @@ void Game::Initialise()
 	}
 
 	m_pFtFont->LoadFont("resources\\fonts\\G.B.BOOT.ttf", 32);
-
+	turnOnThirdPersonMode = true;
 
 
 
@@ -393,6 +387,7 @@ void Game::Render()
 	modelViewMatrixStack.LookAt(m_pCamera->GetPosition(), m_pCamera->GetView(), m_pCamera->GetUpVector());
 	glm::mat4 viewMatrix = modelViewMatrixStack.Top();
 	glm::mat3 viewNormalMatrix = m_pCamera->ComputeNormalMatrix(viewMatrix);
+	glm::mat4 inverseViewMatrix = glm::inverse(m_pCamera->GetViewMatrix());
 	//if (turnOnThirdPersonMode)  modelViewMatrixStack.Rotate(glm::cross(m_pCamera->GetView(), m_pCamera->GetUpVector()), -30.0f);
 
 
@@ -435,7 +430,8 @@ void Game::Render()
 	pMainProgram->SetUniform("spotLightsOn", turnOnSpotLights); // turning off the main light and turning on the spotlights
 	pMainProgram->SetUniform("turnOnToonShading", turnOnToonShading);
 	pMainProgram->SetUniform("turnFogOn", turnFogOn);
-	pMainProgram->SetUniform("m_pGrassPositions", m_pGrassPositions);
+	
+
 
 																// Render the skybox and terrain with full ambient reflectance 
 	modelViewMatrixStack.Push();
@@ -465,7 +461,7 @@ void Game::Render()
 	pMainProgram->SetUniform("material1.Ms", glm::vec3(1.0f));	// Specular material reflectance	
 
 
-																//Render stuff;
+	//Render stuff;
 	{
 
 		// Render the tetrahedron 
@@ -538,6 +534,7 @@ void Game::Render()
 
 		//}
 		// Render the horse 
+
 		{
 			modelViewMatrixStack.Push();
 			modelViewMatrixStack.Translate(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -606,33 +603,6 @@ void Game::Render()
 			modelViewMatrixStack.Pop();
 		}
 
-
-		/*// Render the barrel
-		{
-		modelViewMatrixStack.Push();
-		modelViewMatrixStack.Translate(glm::vec3(100.0f, 0.0f, 0.0f));
-		modelViewMatrixStack.Scale(5.0f);
-		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		m_pBarrelMesh->Render();
-		modelViewMatrixStack.Pop();
-		}*/
-
-		// Render the sphere
-
-		{
-			modelViewMatrixStack.Push();
-			modelViewMatrixStack.Translate(glm::vec3(0.0f, 2.0f, 150.0f));
-			modelViewMatrixStack.Scale(2.0f);
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-			//pMainProgram->SetUniform("bUseTexture", false);
-			m_pSphere->Render();
-			modelViewMatrixStack.Pop();
-		}
-
-
 		// Render the track
 		{
 			modelViewMatrixStack.Push();
@@ -640,8 +610,7 @@ void Game::Render()
 			pMainProgram->SetUniform("bUseTexture", true); // turn off texturing
 			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
 			pMainProgram->SetUniform("matrices.normalMatrix",
-				m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			// Render your object here
+			m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
 			//m_pPath->RenderCentreline();
 			//m_pPath->RenderOffsetCurves();
 			m_pPath->RenderTrack();
@@ -650,8 +619,6 @@ void Game::Render()
 			pMainProgram->SetUniform("turnOnToonShading", turnOnToonShading);
 			modelViewMatrixStack.Pop();
 		}
-
-
 	}
 
 	//Render Collectibles
@@ -687,6 +654,7 @@ void Game::Render()
 	pBunnyShaderProgram->UseProgram();
 	pBunnyShaderProgram->SetUniform("light1.position", viewMatrix*lightPosition1);
 	pBunnyShaderProgram->SetUniform("matrices.projMatrix", m_pCamera->GetPerspectiveProjectionMatrix());
+	pBunnyShaderProgram->SetUniform("matrices.inverseViewMatrix", glm::inverse(m_pCamera->GetViewMatrix()));
 
 	pBunnyShaderProgram->SetUniform("light1.position", viewMatrix*lightPosition1); // Position of light source *in eye coordinates*
 	pBunnyShaderProgram->SetUniform("light1.La", glm::vec3(1.0f));		// Ambient colour of light
@@ -697,8 +665,24 @@ void Game::Render()
 	pBunnyShaderProgram->SetUniform("material1.Ms", glm::vec3(0.0f));	// Specular material reflectance
 	pBunnyShaderProgram->SetUniform("material1.shininess", 15.0f);		// Shininess material property
 	pBunnyShaderProgram->SetUniform("t", m_tt);
+	pBunnyShaderProgram->SetUniform("turnOnReflection", true);
+	pBunnyShaderProgram->SetUniform("CubeMapTex",10);
+
+	//Render the sphere
+	{
+		pBunnyShaderProgram->SetUniform("turnOnBounce", false);
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(glm::vec3(-63.6f, 2.0f, 2.0f));
+		modelViewMatrixStack.Scale(2.0f);
+		pBunnyShaderProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pBunnyShaderProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		m_pSphere->Render();
+		modelViewMatrixStack.Pop();
+	}
 
 	// Render the Rabbit
+	pBunnyShaderProgram->SetUniform("turnOnBounce", true);
+	pBunnyShaderProgram->SetUniform("turnOnReflection", false);
 	modelViewMatrixStack.Push();
 	modelViewMatrixStack.Translate(glm::vec3(m_pPlayerPos.x, std::max(3.0f, m_pPlayerPos.y), m_pPlayerPos.z));
 	modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 90.0f);
@@ -730,8 +714,6 @@ void Game::Render()
 			m_pFtFont->Render(p.x + 170.0f, p.y + 10.0f, 25.0f, (char *)((to_string(m_pLapsCompleted)).c_str()));
 		}
 	}
-
-
 
 	DisplayFrameRate();
 
@@ -828,11 +810,7 @@ void Game::Update()
 	//Updating the lap completed by the player
 	m_pLapsCompleted = m_pPath->CurrentLap(m_currentDistance);
 
-
-
 }
-
-
 
 void Game::DisplayFrameRate()
 {
@@ -862,21 +840,30 @@ void Game::DisplayFrameRate()
 	if (m_framesPerSecond > 0) {
 		// Use the font shader program and render the text
 
-		
-
 		fontProgram->UseProgram();
 		glDisable(GL_DEPTH_TEST);
 		fontProgram->SetUniform("vColour", glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
 		fontProgram->SetUniform("matrices.modelViewMatrix", glm::mat4(1));
 		fontProgram->SetUniform("matrices.projMatrix", m_pCamera->GetOrthographicProjectionMatrix());
-		//fontProgram->SetUniform("vColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		if (turnOnThirdPersonMode == false) m_pFtFont->Render(width - 200, height - 20, 20, "Laps Completed: %d", m_pLapsCompleted);
 		m_pFtFont->Render(20, 20, 20, "Points Collected %d", m_pPointsCollected);
 		//m_pFtFont->Render(20, height - 20, 20, "FPS: %d", m_framesPerSecond);
 		//m_pFtFont->Render(20, height - 60, 20, "View direction %f ,%f, %f", (*m_pCameraViewDir).x, (*m_pCameraViewDir).y, (*m_pCameraViewDir).z);
 		//m_pFtFont->Render(20, height - 80, 20, "View direction %f ,%f, %f", m_pCamera->GetView().x, m_pCamera->GetView().y, m_pCamera->GetView().z);
-		//m_pFtFont->Render(20, height - 80, 20, "Position %f ,%f, %f", m_pCamera->GetPosition().x, m_pCamera->GetPosition().y, m_pCamera->GetPosition().z);
+		if(!showHelp) m_pFtFont->Render(20, height-20 , 20, "Press  H  to show help");
+		else {
+			m_pFtFont->Render(20, height-  20, 20, "Press  H  again to stop showing help");
+			m_pFtFont->Render(20, height - 40, 20, "Movement: A and D");
+			m_pFtFont->Render(20, height - 60, 20, "Third person camera mode: T");
+			m_pFtFont->Render(20, height - 80, 20, "First person camera mode: F");
+			m_pFtFont->Render(20, height - 100, 20, "Left view camera mode: L");
+			m_pFtFont->Render(20, height - 120, 20, "Top view camera mode: T");
+			m_pFtFont->Render(20, height - 140, 20, "Free roam camera mode: O");
 
+			m_pFtFont->Render(20, height - 160, 20, "Toon shader: 2");
+			m_pFtFont->Render(20, height - 180, 20, "Fog shader: 3");
+			m_pFtFont->Render(20, height - 200, 20, "Spot lights: 4");
+		}
 
 	}
 }
@@ -903,7 +890,6 @@ void Game::GameLoop()
 
 
 }
-
 
 WPARAM Game::Execute()
 {
@@ -1022,16 +1008,19 @@ LRESULT Game::ProcessEvents(HWND window, UINT message, WPARAM w_param, LPARAM l_
 			turnOnTopView = false;
 			turnOnFreeRoamMode = false;
 			break;
-		case 'Z':
+		case '4':
 			turnOnToonShading = false;
 			turnOnSpotLights = !turnOnSpotLights;
 			break;
-		case 'Y':
+		case '2':
 			turnOnToonShading = !turnOnToonShading;
 			turnOnSpotLights = false;
 			break;
-		case '2':
+		case '3':
 			turnFogOn = !turnFogOn;
+			break;
+		case 'H':
+			showHelp = !showHelp;
 			break;
 		case 'O':
 			m_pCameraViewDir = &T;

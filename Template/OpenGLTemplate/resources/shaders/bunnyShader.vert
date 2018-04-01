@@ -6,6 +6,7 @@ uniform struct Matrices
 	mat4 projMatrix;
 	mat4 modelViewMatrix; 
 	mat3 normalMatrix;
+	mat4 inverseViewMatrix;
 } matrices;
 
 // Structure holding light information:  its position as well as ambient, diffuse, and specular colours
@@ -30,6 +31,7 @@ struct MaterialInfo
 uniform LightInfo light1; 
 uniform MaterialInfo material1; 
 uniform float t;
+uniform bool turnOnBounce;
 
 // Layout of vertex attributes in VBO
 layout (location = 0) in vec3 inPosition;
@@ -41,6 +43,7 @@ out vec3 vColour;	// Colour computed using reflectance model
 out vec2 vTexCoord;	// Texture coordinate
 
 out vec3 worldPosition;	// used for skybox
+out vec3 reflected;
 
 // This function implements the Phong shading model
 // The code is based on the OpenGL 4.0 Shading Language Cookbook, Chapter 2, pp. 62 - 63, with a few tweaks. 
@@ -74,12 +77,12 @@ void main()
 	// Transform the vertex spatial position using 
 	gl_Position = matrices.projMatrix * matrices.modelViewMatrix * vec4(inPosition, 1.0f);
 
-	gl_Position.y += 5.0f * sin((gl_Position.z)/3 + t );
+	if(turnOnBounce) gl_Position.y += 5.0f * sin((gl_Position.z)/3 + t );
 	
 	// Get the vertex normal and vertex position in eye coordinates
 	vec3 vEyeNorm = normalize(matrices.normalMatrix * inNormal);
 	vec4 vEyePosition = matrices.modelViewMatrix * vec4(inPosition, 1.0f);
-		
+	reflected = (matrices.inverseViewMatrix * vec4(reflect(vEyePosition.xyz,vEyeNorm),1)).xyz	;	
 	// Apply the Phong model to compute the vertex colour
 	vColour = PhongModel(vEyePosition, vEyeNorm);
 	

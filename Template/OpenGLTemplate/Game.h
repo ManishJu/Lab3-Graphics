@@ -16,6 +16,7 @@ class CFreeTypeFont;
 class CHighResolutionTimer;
 class CSphere;
 class COpenAssetImportMesh;
+class COpenAssetImportMeshInst;
 class CAudio;
 class CCatmullRom;
 class CCube;
@@ -52,7 +53,7 @@ private:
 	COpenAssetImportMesh *m_pRabbit;
 	COpenAssetImportMesh *m_pFlowersSet1;
 	COpenAssetImportMesh *m_pFLowersSet2;
-	COpenAssetImportMesh *m_pRock;
+	
 	std::vector<COpenAssetImportMesh*> m_pPlants;
 	std::vector<COpenAssetImportMesh*> m_pCollectible;
 	std::vector<COpenAssetImportMesh*> m_pObstacle;
@@ -70,6 +71,7 @@ private:
 	bool turnOnToonShading;
 	bool resetCam;
 	bool turnFogOn;
+	bool showHelp;
 
 	int m_framesPerSecond;
 	unsigned int m_pPointsCollected;
@@ -90,7 +92,6 @@ private:
 	glm::vec3 *m_pCameraUpVector = &B;
 	glm::vec3 m_pPlayerPos;
 	glm::mat4 m_pPlayerOrientation;
-	glm::vec3 m_pGrassPositions[1000];
 	glm::vec3 m_pButterflyPos[10];
 	glm::mat4 m_pButterflyOrientation[10];
 
