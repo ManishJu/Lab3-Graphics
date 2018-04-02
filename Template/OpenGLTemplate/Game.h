@@ -80,7 +80,7 @@ private:
 	double m_dt;
 
 	float m_currentDistance;
-	float m_currentDistanceB[10];
+	float m_currentDistanceB[10]; // for butterflies
 	float m_cameraSpeed;
 	float m_cameraRotation = 0.0f;
 	float m_pPlayerPosChecker;
@@ -97,7 +97,7 @@ private:
 
 	std::vector<glm::vec3> plantPos;
 	std::vector<glm::vec3> rockPos;
-	std::vector<glm::vec4> plantPos2;
+	std::vector<glm::vec4> plantPos2; // 2nd type of plants
 	std::vector<glm::vec3> collectiblePos;
 	std::vector<glm::vec3> m_pObstaclesPos;
 

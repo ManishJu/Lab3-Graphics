@@ -73,9 +73,7 @@ vec3 BlinnPhongModel(vec4 eyePosition, vec3 eyeNorm)
 
 vec3 BlinnPhongSpotlightModel(LightInfo light, vec4 p, vec3 n)
 {
-	//float distance = length(light.position - p);
-	//float attenuation = 1.0 / (light.constant + light.linear * distance +
-		//light.quadratic * (distance * distance));
+	
 
 	vec3 s = normalize(vec3(light.position - p));
 	float angle = acos(dot(-s, light.direction));
@@ -99,9 +97,10 @@ vec3 BlinnPhongSpotlightModel(LightInfo light, vec4 p, vec3 n)
 
 void main()
 {
-	float w = exp(-0.01*length(vEyePosition.xyz));
+	float rho = 0.01;
+	float w = exp(-rho*length(vEyePosition.xyz));
 	vec3 vColour;
-	 vColour = BlinnPhongModel(vEyePosition,normalize(vEyeNorm));
+	vColour = BlinnPhongModel(vEyePosition,normalize(vEyeNorm));
 	if(spotLightsOn)  vColour = BlinnPhongSpotlightModel(light2, vEyePosition, normalize(vEyeNorm)) + BlinnPhongSpotlightModel(light3, vEyePosition, normalize(vEyeNorm));
 	else  vColour = BlinnPhongModel(vEyePosition, normalize(vEyeNorm));
 	if (renderSkybox) {
@@ -111,19 +110,19 @@ void main()
 
 		// Get the texel colour from the texture sampler
 		vec4 vTexColour = texture(sampler0, vTexCoord);	
-	
+
+		//toon shader with silhouette
 		if(turnOnToonShading)  vColour = ((dot(normalize(-vEyePosition.xyz),normalize(vEyeNorm))) < 0.2 ? 0 : 1 )*floor(vColour * 2) / 2;
+
 		if (bUseTexture)
 			vOutputColour = vTexColour*vec4(vColour, 1.0f);	// Combine object colour and texture 
-			//vOutputColour = vec4(vColour, 1.0f);	// Combine object colour and texture 
-
 		else 
 			vOutputColour = vec4(vColour, 1.0f);	// Just use the colour instead
 
+		//mixing the colour with the fog colour	
 		if (turnFogOn) vOutputColour.xyz = w * vOutputColour.xyz + (1 - w)* vec3(0.5, 0.5, 0.5);
 
 		
-		//vOutputColour = floor(vOutputColour * 10)/10;
 	}
 	
 	

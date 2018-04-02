@@ -317,7 +317,7 @@ void Game::Initialise()
 	m_pAudio->LoadMusicStream("Resources\\Audio\\On Horse Day - Zelda Breath of the Wild Soundtrack.mp3");	// Royalty free music from http://www.nosoapradio.us/
 	m_pAudio->PlayMusicStream();
 
-
+	//creating the path for the game
 	m_pPath->CreateCentreline();
 	m_pPath->CreateOffsetCurves();
 	m_pPath->CreateTrack();
@@ -328,11 +328,12 @@ void Game::Initialise()
 	m_pCube->Create();
 	m_pTetrahedron->Create();
 
+	//Creating paths for butterfly
 	for (unsigned int i = 0; i < 10; i++) {
 		m_pPathButterfly[i]->CreateLineButterflyPath();
 	}
 
-
+	//Positions at which collectibles will be placed
 	for (unsigned int i = 0; i < 10; i++) {
 
 		glm::vec3 point_to_add;
@@ -340,7 +341,7 @@ void Game::Initialise()
 		collectiblePos.push_back(point_to_add);
 	}
 
-
+	//Positions where the obstacles will be placed
 	for (unsigned int i = 0; i < 10; i++) {
 
 		glm::vec3 point_to_add;
@@ -348,8 +349,11 @@ void Game::Initialise()
 		m_pObstaclesPos.push_back(point_to_add);
 	}
 
+	//Loading font
 	m_pFtFont->LoadFont("resources\\fonts\\G.B.BOOT.ttf", 32);
+	// By default the camera mode is third person
 	turnOnThirdPersonMode = true;
+
 
 
 
@@ -401,9 +405,9 @@ void Game::Render()
 
 	glm::vec4 lightPosition2(0, 20, 0, 1); // Position of light source *in world coordinates*
 	pMainProgram->SetUniform("light2.position", viewMatrix*lightPosition2);
-	pMainProgram->SetUniform("light2.La", glm::vec3(0.2f, 0.0f, 0.2f));
-	pMainProgram->SetUniform("light2.Ld", glm::vec3(0.5f, 0.0f, 0.5f));
-	pMainProgram->SetUniform("light2.Ls", glm::vec3(1.0f, 0.0f, 1.0f));
+	pMainProgram->SetUniform("light2.La", glm::vec3(0.01f, 0.01f, 0.2f));
+	pMainProgram->SetUniform("light2.Ld", glm::vec3(0.2f, 0.2f, 0.5f));
+	pMainProgram->SetUniform("light2.Ls", glm::vec3(0.3f, 0.3f, 1.0f));
 	pMainProgram->SetUniform("light2.direction", glm::normalize(viewNormalMatrix*glm::vec3(0, -1, 0)));
 	pMainProgram->SetUniform("light2.exponent", 25.0f);
 	pMainProgram->SetUniform("light2.cutoff", 30.0f);
@@ -430,10 +434,10 @@ void Game::Render()
 	pMainProgram->SetUniform("spotLightsOn", turnOnSpotLights); // turning off the main light and turning on the spotlights
 	pMainProgram->SetUniform("turnOnToonShading", turnOnToonShading);
 	pMainProgram->SetUniform("turnFogOn", turnFogOn);
-	
 
 
-																// Render the skybox and terrain with full ambient reflectance 
+
+	// Render the skybox and terrain with full ambient reflectance 
 	modelViewMatrixStack.Push();
 	pMainProgram->SetUniform("renderSkybox", true);
 	// Translate the modelview matrix to the camera eye point so skybox stays centred around camera
@@ -461,168 +465,167 @@ void Game::Render()
 	pMainProgram->SetUniform("material1.Ms", glm::vec3(1.0f));	// Specular material reflectance	
 
 
-	//Render stuff;
-	{
+
 
 		// Render the tetrahedron 
-		{
-			modelViewMatrixStack.Push();
-			modelViewMatrixStack.Translate(glm::vec3(170.0f, 50.0f, -320.0f));
-			modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
-			modelViewMatrixStack.Scale(50.0f);
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			m_pTetrahedron->Render();
-			modelViewMatrixStack.Pop();
-		}
-
-		//Render flower beside the path
-		{
-			modelViewMatrixStack.Push();
-			modelViewMatrixStack.Translate(glm::vec3(0.0f, 1.0f, 90.0f));
-			modelViewMatrixStack.Scale(15.0f);
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-			//pMainProgram->SetUniform("bUseTexture", false);
-			m_pFlowersSet1->Render();
-			modelViewMatrixStack.Pop();
-		}
-		//Render flowers in garden
-		for (int i = 1; i < 100; i++) {
-
-			modelViewMatrixStack.Push();
-			modelViewMatrixStack.Translate(plantPos[i]);
-			modelViewMatrixStack.Scale(15.0f);
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-			//pMainProgram->SetUniform("bUseTexture", false);
-			m_pFlowersSet1->Render();
-			modelViewMatrixStack.Pop();
-
-		}
-
-		//Render other plants in garden
-		for (int i = 0; i < 20; i++) {
-
-			modelViewMatrixStack.Push();
-			modelViewMatrixStack.Translate(plantPos2[i].x, plantPos2[i].y, plantPos2[i].z);
-			modelViewMatrixStack.Scale(15.0f);
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-			//pMainProgram->SetUniform("bUseTexture", false);
-			glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			m_pPlants[(int)plantPos2[i].w]->Render();
-			modelViewMatrixStack.Pop();
-
-		}
-
-		//for (int i = 110; i < 120; i++) {
-
-		//	modelViewMatrixStack.Push();
-		//	modelViewMatrixStack.Translate(plantPos2[i].x, plantPos2[i].y, plantPos2[i].z);
-		//	modelViewMatrixStack.Scale(15.0f);
-		//	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-		//	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-		//	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
-		//	//pMainProgram->SetUniform("bUseTexture", false);
-		//	glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//	m_pPlants[plantPos2[i].w]->Render();
-		//	modelViewMatrixStack.Pop();
-
-		//}
-		// Render the horse 
-
-		{
-			modelViewMatrixStack.Push();
-			modelViewMatrixStack.Translate(glm::vec3(0.0f, 0.0f, 0.0f));
-			modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
-			modelViewMatrixStack.Scale(2.5f);
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			m_pHorseMesh->Render();
-			modelViewMatrixStack.Pop();
-		}
-
-		// Render the butterflies
-		for (int i = 0; i < 10; i++)
-		{
-			modelViewMatrixStack.Push();
-			modelViewMatrixStack.Translate(glm::vec3(m_pButterflyPos[i]));
-			modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), -90.0f);
-			modelViewMatrixStack.Scale(.3f);
-			if (i == 4 || i == 9) modelViewMatrixStack.Scale(.03f);
-			modelViewMatrixStack *= m_pButterflyOrientation[i];
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			m_pButterflies[i]->Render();
-
-			modelViewMatrixStack.Pop();
-		}
-
-		// Render the crate box (cube) 
-		{
-			modelViewMatrixStack.Push();
-			modelViewMatrixStack.Translate(glm::vec3(0.0f - 70.0f, 2.0f, 0.0f - 10.0f));
-			modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
-			modelViewMatrixStack.Scale(2.5f);
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			m_pCube->Render();
-			modelViewMatrixStack.Pop();
-		}
-
-
-
-		// Render the big  tree
-		{
-			modelViewMatrixStack.Push();
-			modelViewMatrixStack.Translate(glm::vec3(0.0f - 50.0f, 2.0f, 0.0f - 10.0f));
-			modelViewMatrixStack.Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
-			modelViewMatrixStack.Scale(100.0f);
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			m_pTree1->Render();
-			modelViewMatrixStack.Pop();
-		}
-
-
-		// Render the second big tree
-		{
-			modelViewMatrixStack.Push();
-			modelViewMatrixStack.Translate(glm::vec3(+180.0f, 2.0f, -40.0f));
-			modelViewMatrixStack.Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
-			modelViewMatrixStack.Scale(100.0f);
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			m_pTree1->Render();
-			modelViewMatrixStack.Pop();
-		}
-
-		// Render the track
-		{
-			modelViewMatrixStack.Push();
-			pMainProgram->SetUniform("turnOnToonShading", false);
-			pMainProgram->SetUniform("bUseTexture", true); // turn off texturing
-			pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
-			pMainProgram->SetUniform("matrices.normalMatrix",
-			m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
-			//m_pPath->RenderCentreline();
-			//m_pPath->RenderOffsetCurves();
-			m_pPath->RenderTrack();
-			m_pPath->RenderLeftSideFence();
-			m_pPath->RenderRightSideFence();
-			pMainProgram->SetUniform("turnOnToonShading", turnOnToonShading);
-			modelViewMatrixStack.Pop();
-		}
+	{
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(glm::vec3(170.0f, 50.0f, -320.0f));
+		modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
+		modelViewMatrixStack.Scale(50.0f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		m_pTetrahedron->Render();
+		modelViewMatrixStack.Pop();
 	}
 
+	//Render flower beside the path
+	{
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(glm::vec3(0.0f, 1.0f, 90.0f));
+		modelViewMatrixStack.Scale(15.0f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		//pMainProgram->SetUniform("bUseTexture", false);
+		m_pFlowersSet1->Render();
+		modelViewMatrixStack.Pop();
+	}
+	//Render flowers in garden
+	for (int i = 1; i < 100; i++) {
+
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(plantPos[i]);
+		modelViewMatrixStack.Scale(15.0f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		//pMainProgram->SetUniform("bUseTexture", false);
+		m_pFlowersSet1->Render();
+		modelViewMatrixStack.Pop();
+
+	}
+
+	//Render other plants in garden
+	for (int i = 0; i < 20; i++) {
+
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(plantPos2[i].x, plantPos2[i].y, plantPos2[i].z);
+		modelViewMatrixStack.Scale(15.0f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+		//pMainProgram->SetUniform("bUseTexture", false);
+		glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		m_pPlants[(int)plantPos2[i].w]->Render();
+		modelViewMatrixStack.Pop();
+
+	}
+
+	//for (int i = 110; i < 120; i++) {
+
+	//	modelViewMatrixStack.Push();
+	//	modelViewMatrixStack.Translate(plantPos2[i].x, plantPos2[i].y, plantPos2[i].z);
+	//	modelViewMatrixStack.Scale(15.0f);
+	//	pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+	//	pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+	//	// To turn off texture mapping and use the sphere colour only (currently white material), uncomment the next line
+	//	//pMainProgram->SetUniform("bUseTexture", false);
+	//	glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//	m_pPlants[plantPos2[i].w]->Render();
+	//	modelViewMatrixStack.Pop();
+
+	//}
+	// Render the horse 
+
+	{
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(glm::vec3(0.0f, 0.0f, 0.0f));
+		modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
+		modelViewMatrixStack.Scale(2.5f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		m_pHorseMesh->Render();
+		modelViewMatrixStack.Pop();
+	}
+
+	// Render the butterflies
+	for (int i = 0; i < 10; i++)
+	{
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(glm::vec3(m_pButterflyPos[i]));
+		modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), -90.0f);
+		modelViewMatrixStack.Scale(.3f);
+		if (i == 4 || i == 9) modelViewMatrixStack.Scale(.03f);
+		modelViewMatrixStack *= m_pButterflyOrientation[i];
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		m_pButterflies[i]->Render();
+
+		modelViewMatrixStack.Pop();
+	}
+
+	// Render the crate box (cube) 
+	{
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(glm::vec3(0.0f - 70.0f, 2.0f, 0.0f - 10.0f));
+		modelViewMatrixStack.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 180.0f);
+		modelViewMatrixStack.Scale(2.5f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		m_pCube->Render();
+		modelViewMatrixStack.Pop();
+	}
+
+
+
+	// Render the big  tree
+	{
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(glm::vec3(0.0f - 50.0f, 2.0f, 0.0f - 10.0f));
+		modelViewMatrixStack.Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
+		modelViewMatrixStack.Scale(100.0f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		m_pTree1->Render();
+		modelViewMatrixStack.Pop();
+	}
+
+
+	// Render the second big tree
+	{
+		modelViewMatrixStack.Push();
+		modelViewMatrixStack.Translate(glm::vec3(+180.0f, 2.0f, -40.0f));
+		modelViewMatrixStack.Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
+		modelViewMatrixStack.Scale(100.0f);
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix", m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		m_pTree1->Render();
+		modelViewMatrixStack.Pop();
+	}
+
+	// Render the track
+	{
+		modelViewMatrixStack.Push();
+		pMainProgram->SetUniform("turnOnToonShading", false);
+		pMainProgram->SetUniform("bUseTexture", true); // turn off texturing
+		pMainProgram->SetUniform("matrices.modelViewMatrix", modelViewMatrixStack.Top());
+		pMainProgram->SetUniform("matrices.normalMatrix",
+			m_pCamera->ComputeNormalMatrix(modelViewMatrixStack.Top()));
+		//m_pPath->RenderCentreline();
+		//m_pPath->RenderOffsetCurves();
+		m_pPath->RenderTrack();
+		m_pPath->RenderLeftSideFence();
+		m_pPath->RenderRightSideFence();
+		pMainProgram->SetUniform("turnOnToonShading", turnOnToonShading);
+		modelViewMatrixStack.Pop();
+	}
+
+
 	//Render Collectibles
-	
+
 	for (int i = 0; i < 10; i++) {
 		modelViewMatrixStack.Push();
 		modelViewMatrixStack.Translate(collectiblePos[i]);
@@ -666,7 +669,7 @@ void Game::Render()
 	pBunnyShaderProgram->SetUniform("material1.shininess", 15.0f);		// Shininess material property
 	pBunnyShaderProgram->SetUniform("t", m_tt);
 	pBunnyShaderProgram->SetUniform("turnOnReflection", true);
-	pBunnyShaderProgram->SetUniform("CubeMapTex",10);
+	pBunnyShaderProgram->SetUniform("CubeMapTex", 10);
 
 	//Render the sphere
 	{
@@ -714,6 +717,7 @@ void Game::Render()
 			m_pFtFont->Render(p.x + 170.0f, p.y + 10.0f, 25.0f, (char *)((to_string(m_pLapsCompleted)).c_str()));
 		}
 	}
+ 
 
 	DisplayFrameRate();
 
@@ -973,20 +977,20 @@ LRESULT Game::ProcessEvents(HWND window, UINT message, WPARAM w_param, LPARAM l_
 		case VK_F1:
 			m_pAudio->PlayEventSound();
 			break;
-		case 'A':
+		case 'A': // shifting player's position
 			m_pPlayerPosChecker = std::min(1.0f, std::max(m_pPlayerPosChecker - 1.0f, -1.0f));
 			break;
 		case 'D':
 			m_pPlayerPosChecker = std::min(1.0f, std::max(m_pPlayerPosChecker + 1.0f, -1.0f));
 			break;
-		case 'L':
+		case 'L': //Left camera view
 			m_pCameraViewDir = &N;
 			m_pCameraUpVector = &B;
 			turnOnThirdPersonMode = false;
 			turnOnTopView = false;
 			turnOnFreeRoamMode = false;
 			break;
-		case 'F':
+		case 'F': //First person camera view
 			m_pCameraViewDir = &T;
 			m_pCameraUpVector = &B;
 			turnOnThirdPersonMode = false;
@@ -994,35 +998,35 @@ LRESULT Game::ProcessEvents(HWND window, UINT message, WPARAM w_param, LPARAM l_
 			turnOnFreeRoamMode = false;
 
 			break;
-		case 'U':
+		case 'U': // Top view camera mode
 			m_pCameraViewDir = &B;
 			m_pCameraUpVector = &T;
 			turnOnThirdPersonMode = false;
 			turnOnTopView = true;
 			turnOnFreeRoamMode = false;
 			break;
-		case 'T':
+		case 'T': //Third person camera mode
 			m_pCameraViewDir = &T;
 			m_pCameraUpVector = &B;
 			turnOnThirdPersonMode = true;
 			turnOnTopView = false;
 			turnOnFreeRoamMode = false;
 			break;
-		case '4':
+		case '4': //Spotlights
 			turnOnToonShading = false;
 			turnOnSpotLights = !turnOnSpotLights;
 			break;
-		case '2':
+		case '2': //Toon shading
 			turnOnToonShading = !turnOnToonShading;
 			turnOnSpotLights = false;
 			break;
-		case '3':
+		case '3': //Fog
 			turnFogOn = !turnFogOn;
 			break;
-		case 'H':
+		case 'H': //Show help menu
 			showHelp = !showHelp;
 			break;
-		case 'O':
+		case 'O': //Free roam camera mode
 			m_pCameraViewDir = &T;
 			m_pCameraUpVector = &B;
 			turnOnThirdPersonMode = false;
