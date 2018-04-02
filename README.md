@@ -1,2 +1,2 @@
-# Lab3-Graphics
-Lab3 of Graphics
+# Graphics demo
+A repository showcasing various OpenGL graphics techniques including shaders.
